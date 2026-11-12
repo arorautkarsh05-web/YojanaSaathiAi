@@ -1,0 +1,14 @@
+{
+  "name": "yojanasaathi",
+  "version": "3.0.0",
+  "private": true,
+  "description": "YojanaSaathi AI — Farmer-first Government Benefit Navigator",
+  "scripts": {
+    "start": "npm --prefix backend start",
+    "backend": "npm --prefix backend start",
+    "frontend": "npm --prefix frontend run dev",
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "test": "npm --prefix backend test"
+  }
+}

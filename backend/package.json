@@ -1,0 +1,12 @@
+{
+  "name": "yojanasaathi-backend",
+  "version": "3.0.0",
+  "private": true,
+  "description": "YojanaSaathi AI — FastAPI Backend Server",
+  "scripts": {
+    "start": "powershell -ExecutionPolicy Bypass -Command \"if (Test-Path ..\\venv\\Scripts\\python.exe) { ..\\venv\\Scripts\\python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload } else { python -m uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload }\"",
+    "dev": "npm start",
+    "test": "powershell -ExecutionPolicy Bypass -Command \"if (Test-Path ..\\venv\\Scripts\\python.exe) { ..\\venv\\Scripts\\python -m pytest tests -v } else { python -m pytest tests -v }\""
+  }
+}
+
