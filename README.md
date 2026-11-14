@@ -38,7 +38,8 @@ YojanaSaathi AI is an intelligent farmer-benefit navigation platform designed to
 | Database | SQLite / PostgreSQL support |
 
 ### Implementation & Testing Indicators
-![Uploading image.png…]()
+<img width="1882" height="907" alt="image" src="https://github.com/user-attachments/assets/2328bf50-f05b-4b0c-98e1-8a387e40dadd" />
+
 
 
 [![Tests](https://img.shields.io/badge/Pytest-105%20Passed-brightgreen.svg)](documentation/README.md)
