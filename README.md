@@ -38,6 +38,8 @@ YojanaSaathi AI is an intelligent farmer-benefit navigation platform designed to
 | Database | SQLite / PostgreSQL support |
 
 ### Implementation & Testing Indicators
+![Uploading image.png…]()
+
 
 [![Tests](https://img.shields.io/badge/Pytest-105%20Passed-brightgreen.svg)](documentation/README.md)
 [![Playwright](https://img.shields.io/badge/Playwright-7%20Milestones-blueviolet.svg)](documentation/README.md)
@@ -117,6 +119,8 @@ YojanaSaathi AI aims to answer:
 ---
 
 # 3. 🚀 Core Innovations
+<img width="1885" height="891" alt="image" src="https://github.com/user-attachments/assets/030cc9b7-fcd3-4bec-918c-04b2cfa79903" />
+
 
 ## Innovation 1: Explainable Three-Valued Eligibility Engine
 
@@ -249,6 +253,8 @@ Offline availability does not mean that government portals, live verification, o
 ---
 
 # 4. ⚖️ How Is YojanaSaathi AI Different from Existing Platforms?
+<img width="1882" height="902" alt="image" src="https://github.com/user-attachments/assets/d711962b-7255-4b1b-8229-b7908d4289d6" />
+
 
 YojanaSaathi AI is not designed to replace government portals or existing farmer-support services.
 
