@@ -13,15 +13,29 @@ interface LandingPageProps {
   onStartWizard: () => void;
   onOpenSchemes: () => void;
   onOpenAssistant: () => void;
+  onOpenActionPlan?: () => void;
 }
 
 export const LandingPage: React.FC<LandingPageProps> = ({
   onStartWizard,
   onOpenSchemes,
   onOpenAssistant,
+  onOpenActionPlan,
 }) => {
   const { t, i18n } = useTranslation();
   const isHindi = (i18n.resolvedLanguage || i18n.language || 'hi').startsWith('hi');
+  const [cachedPlanNum, setCachedPlanNum] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    try {
+      const num = localStorage.getItem('yojanasaathi_latest_plan_number');
+      if (num) {
+        setCachedPlanNum(num);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   return (
     <div className="space-y-16 sm:space-y-24 pb-16">
@@ -87,6 +101,25 @@ export const LandingPage: React.FC<LandingPageProps> = ({
                 {t('hero.ctaSchemes')}
               </Button>
             </div>
+
+            {/* Offline Recovered Action Plan Alert */}
+            {cachedPlanNum && onOpenActionPlan && (
+              <div className="p-3 bg-white/70 border border-forest-800/20 rounded-natural flex items-center justify-between gap-3 text-xs text-forest-900 shadow-2xs backdrop-blur-sm">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-leaf-600 animate-pulse" />
+                  <span className="font-semibold">
+                    {isHindi ? `सहेजी गई कार्य योजना (#${cachedPlanNum}) उपलब्ध है` : `Cached Offline Plan (#${cachedPlanNum}) available`}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={onOpenActionPlan}
+                  className="px-3 py-1 bg-forest-800 text-white rounded font-medium hover:bg-forest-900 transition-colors shadow-2xs cursor-pointer"
+                >
+                  {isHindi ? 'योजना खोलें' : 'Open Plan'}
+                </button>
+              </div>
+            )}
 
             {/* Trust disclaimer note */}
             <div className="pt-3 border-t border-white/40 text-xs text-ink-950 font-medium flex items-start gap-2">

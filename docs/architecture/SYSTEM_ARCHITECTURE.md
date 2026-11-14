@@ -48,3 +48,4 @@ YojanaSaathi AI is built on a clean multi-tiered architecture that strictly sepa
 - Dual-engine compatibility: SQLite for zero-configuration hackathon demos; PostgreSQL for clustered production deployment.
 - Strict foreign key constraints with cascade behaviors (`ondelete="CASCADE"`, `ondelete="SET NULL"`).
 - Immutable administrative audit logs for compliance review.
+

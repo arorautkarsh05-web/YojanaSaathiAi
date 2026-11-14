@@ -27,3 +27,4 @@
 - **Phase 2 (Q2 2027):** Expansion of statutory catalogue from 6 to 25 Central and State schemes covering animal husbandry, fisheries, and horticulture.
 - **Phase 3 (Q3 2027):** Voice-first native telephony interface (IVR / WhatsApp audio) for illiterate farmers without smartphones.
 - **Phase 4 (Q4 2027):** Pan-India geographic expansion to all 28 states and 8 union territories.
+

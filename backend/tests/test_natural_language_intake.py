@@ -88,3 +88,4 @@ def test_safe_offline_intake_fallback():
     assert res.can_proceed_to_evaluation is False
     assert "district" in res.missing_information
     assert "landholding" in res.missing_information
+

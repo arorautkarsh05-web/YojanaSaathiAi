@@ -22,7 +22,9 @@
       "operator": "IN",
       "target_value": [
         "tubeWell",
-        "canal"
+        "canal",
+        "borewell",
+        "pond"
       ],
       "is_mandatory": true,
       "citation": "PMKSY Guidelines Clause 5.2: Farmer must possess an assured irrigation water source."

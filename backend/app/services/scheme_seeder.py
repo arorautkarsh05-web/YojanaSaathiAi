@@ -217,7 +217,7 @@ def seed_schemes_and_rules(db: Session) -> None:
                     "citation": "UP Revenue Dept Notification Rule 3: Resident farmer of Uttar Pradesh."
                 },
                 {
-                    "rule_code": "RULE_UP_DURGHATNA_LAND_OR_LABOR",
+                    "rule_code": "RULE_UP_DURGHATNA_KHATAUNI",
                     "title_en": "Registered Farmer or Landless Agricultural Worker",
                     "title_hi": "खतौनी में दर्ज किसान अथवा ग्राम पंचायत सत्यापित भूमिहीन खेतिहर मजदूर",
                     "field_name": "landholding_acres",

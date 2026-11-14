@@ -25,3 +25,4 @@ data/
 - All schemes reflect official government gazettes, department circulars, and revised operational guidelines.
 - Geographic boundaries strictly follow the Uttar Pradesh State Department of Agriculture classification.
 - No synthetic or estimated values are included without explicit qualification.
+

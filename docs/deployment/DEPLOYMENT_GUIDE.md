@@ -93,3 +93,4 @@ Health check probes:
 - [x] Ensure `COOKIE_SECURE=true` and HTTPOnly flags on authentication cookies.
 - [x] Verify database backups via scheduled `pg_dump` cron jobs.
 - [x] Enforce rate limiting on authentication routes `/api/v1/auth/login`.
+

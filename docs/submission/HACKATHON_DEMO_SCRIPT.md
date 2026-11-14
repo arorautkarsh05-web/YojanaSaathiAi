@@ -76,3 +76,4 @@
 
 ### Part 5: Technical Rigor & Conclusion (4:15 - 5:00)
 - **Speaker:** *"Under the hood: 57 automated tests covering full farmer lifecycles, bilingual groundings, and PostgreSQL/SQLite dual compatibility. 100% verified live government URLs, zero hallucinated statutory circulars, and strict adherence to WCAG 2.2 AA accessibility. YojanaSaathi transforms complex public policy into clear, trustworthy intelligence for every farmer in Uttar Pradesh. Thank you!"*
+

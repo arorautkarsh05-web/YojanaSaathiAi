@@ -29,3 +29,4 @@
 - Custom SVG & high-resolution illustration of UP agro-climatic zones with frosted-glass framing.
 - Full keyboard navigation and visible focus rings on all interactive buttons and modals.
 - Clean printable action plan stylesheet (`@media print`) stripping away UI chrome for crisp physical paper copies.
+

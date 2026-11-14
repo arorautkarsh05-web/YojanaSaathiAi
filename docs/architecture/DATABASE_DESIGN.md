@@ -45,3 +45,4 @@ erDiagram
 ### 2.4 Action Plans & Auditing
 - `action_plans`: Generated citizen plans. Columns: `plan_number` (`UNIQUE`, index), `selected_schemes_json`, `results_summary_json`, `checklist_items_json`, `created_at`.
 - `audit_logs`: Immutable administrative audit trail capturing `user_id`, `action`, `resource_type`, `resource_id`, `metadata_json`, and `created_at`.
+

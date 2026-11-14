@@ -182,3 +182,4 @@ All backend API routes are prefixed under `/api` and conform to OpenAPI 3.1 spec
 - `GET /api/admin/overview`: System operational metrics and verified rule counts.
 - `GET /api/admin/audit-logs`: Paginated security and change audit trails.
 - `POST /api/admin/policy-impact`: Simulates downstream citizen impact when a policy rule changes.
+

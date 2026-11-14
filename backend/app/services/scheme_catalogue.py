@@ -159,7 +159,7 @@ SCHEME_CATALOGUE: Dict[str, Dict[str, Any]] = {
                 "title_hi": "सुनिश्चित जल स्रोत (नलकूप, बोरवेल अथवा नहर कनेक्शन)",
                 "field_name": "irrigation_source",
                 "operator": "IN",
-                "target_value": ["tubeWell", "canal"],
+                "target_value": ["tubeWell", "canal", "borewell", "pond"],
                 "is_mandatory": True,
                 "citation": "PMKSY Guidelines Clause 5.2: Farmer must possess an assured irrigation water source."
             },

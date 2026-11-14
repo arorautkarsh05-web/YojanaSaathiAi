@@ -44,3 +44,4 @@ For cross-browser UI verification, Playwright scenarios test the complete citize
 5. **Scenario 5:** Recommendation view displays evaluated schemes (PMKSY-PDMC, PMFBY, KCC, PM-KISAN) with `PASS`, `FAIL`, and `NEEDS_MORE_INFO` statuses.
 6. **Scenario 6:** Farmer selects schemes and generates unified Action Plan with 7-stage benefit tracker and deduplicated document checklist.
 7. **Scenario 7:** Farmer prints or caches the action plan offline.
+
