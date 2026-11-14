@@ -52,3 +52,4 @@ Any file failing magic-byte inspection is rejected immediately with HTTP 415.
 - **JWT Token Family Rotation:** Refresh tokens use session family rotation. If a compromised refresh token is re-submitted, the backend detects the replay attack and revokes the entire token family immediately.
 - **Role-Based Access Control (RBAC):** Strict separation of privileges between `CITIZEN`, `OPERATOR`, and `ADMIN`. Departmental and administrative APIs are guarded by dependency-injected security gates (`get_current_admin_user`).
 - **Complete Audit Trail:** Every critical lifecycle action (document toggle, upload, stage completion, final confirmation) writes an immutable record to the `AuditLog` table.
+

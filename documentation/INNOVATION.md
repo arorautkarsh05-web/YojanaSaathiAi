@@ -79,3 +79,4 @@ A naive conversion factor of $0.625$ applied in Eastern UP would turn a $3\text{
 
 - Generates an immutable, vector-rendered 1-page PDF using ReportLab with a unique reference number (`FBS-UP-20261114-XXXXXX`).
 - Includes verified document checklist, convergence roadmap, step-by-step CSC instructions, and a prominent statutory notice: *"NOT A GOVERNMENT CERTIFICATE — INDEPENDENT PREPARATION ROADMAP"*.
+

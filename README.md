@@ -83,3 +83,4 @@ python scripts/run_playwright_e2e.py
 
 ### 🏛️ Statutory Disclaimer
 *YojanaSaathi AI is an independent, evidence-grounded welfare intelligence platform developed by Team Aalekh. It is NOT an official government application or certificate. All scheme recommendations and preparation plans are derived strictly from published gazette rules, and official benefit sanction remains the sole discretion of the respective government authority.*
+

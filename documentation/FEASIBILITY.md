@@ -44,3 +44,4 @@ At a modest volume of 50,000 farmer sessions per month, the compute cost is **le
 1. **Phase 1 (Current):** Uttar Pradesh — All 75 Districts, 6 Core Statutory Schemes, Bigha Disambiguation across all 9 Agro-Climatic Zones.
 2. **Phase 2 (Immediate Extension):** Expansion to neighboring Hindi-belt agrarian states (Madhya Pradesh, Bihar, Rajasthan, Haryana) by plugging in state-specific land records (e.g., Guni/Bigha variants) and state welfare schemes.
 3. **Phase 3 (National Scale):** Integration with AgriStack / Farmer ID APIs and UMANG gateway for auto-populating verified land records with explicit farmer consent.
+

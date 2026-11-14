@@ -56,3 +56,4 @@ YojanaSaathi is engineered for real-world rural constraints:
 - Works with low-bandwidth networks (~132 KB gzipped frontend bundle).
 - Recovers fully offline after browser restarts.
 - Replaces tedious file uploads with **1-Click Checkboxes** for standard documents, while restricting file uploads to Photo and Aadhaar with **instant auto-verification**.
+
