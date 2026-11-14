@@ -360,3 +360,4 @@ def generate_farmer_benefit_summary_pdf(
     pdf_bytes = buffer.getvalue()
     buffer.close()
     return pdf_bytes
+

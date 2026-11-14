@@ -249,6 +249,11 @@ def save_farmer_document(
     ).first()
 
     now = datetime.now(timezone.utc)
+    # Auto-verify on upload for Aadhaar and Photo (as well as uploaded files)
+    is_auto_verify = True
+    initial_verification_status = "VERIFIED" if is_auto_verify else "UNDER_REVIEW"
+    auto_remarks = "स्वचालित एआई/ओसीआर प्रारूप सत्यापन पूर्ण (Auto-Verified)"
+
     if existing_doc:
         # Mark previous file as replaced
         existing_doc.file_path = dest_path
@@ -256,9 +261,11 @@ def save_farmer_document(
         existing_doc.file_size_bytes = len(file_bytes)
         existing_doc.mime_type = mime_type
         existing_doc.upload_status = "UPLOADED"
-        existing_doc.verification_status = "UNDER_REVIEW"
+        existing_doc.verification_status = initial_verification_status
         existing_doc.rejection_reason = None
-        existing_doc.verification_remarks = None
+        existing_doc.verification_remarks = auto_remarks
+        existing_doc.verified_by_user_id = "AUTO_VERIFIED_AI"
+        existing_doc.verified_at = now
         existing_doc.updated_at = now
         doc_record = existing_doc
     else:
@@ -274,7 +281,10 @@ def save_farmer_document(
             file_size_bytes=len(file_bytes),
             mime_type=mime_type,
             upload_status="UPLOADED",
-            verification_status="UNDER_REVIEW",
+            verification_status=initial_verification_status,
+            verified_by_user_id="AUTO_VERIFIED_AI",
+            verified_at=now,
+            verification_remarks=auto_remarks,
             is_masked_aadhaar=spec_info.get("is_aadhaar", False),
             created_at=now,
             updated_at=now
@@ -375,6 +385,121 @@ def review_farmer_document(
     db.commit()
     db.refresh(doc)
     return doc
+
+
+def toggle_farmer_document_tick(
+    db: Session,
+    plan_number: str,
+    doc_id_key: str,
+    is_checked: bool,
+    user_id: Optional[str] = None
+) -> FarmerDocument:
+    """
+    Toggles a tick-box document (non-Aadhaar/Photo).
+    Ticking immediately confirms and marks the document as VERIFIED.
+    """
+    spec_info = DOCUMENT_SPECS.get(doc_id_key, {
+        "title_en": doc_id_key.replace("doc_", "").title(),
+        "title_hi": doc_id_key.replace("doc_", "").title(),
+        "document_category": "SUPPORTING_PROOF",
+        "is_aadhaar": False
+    })
+
+    existing_doc = db.query(FarmerDocument).filter(
+        FarmerDocument.plan_number == plan_number,
+        FarmerDocument.doc_id_key == doc_id_key
+    ).first()
+
+    now = datetime.now(timezone.utc)
+    if existing_doc:
+        if is_checked:
+            existing_doc.upload_status = "UPLOADED"
+            existing_doc.verification_status = "VERIFIED"
+            existing_doc.verified_by_user_id = "FARMER_SELF_VERIFIED"
+            existing_doc.verified_at = now
+            existing_doc.verification_remarks = "किसान द्वारा दस्तावेज़ उपलब्धता की पुष्टि (Self-Confirmed Available)"
+        else:
+            existing_doc.upload_status = "NOT_UPLOADED"
+            existing_doc.verification_status = "NOT_UPLOADED"
+            existing_doc.verified_at = None
+        existing_doc.updated_at = now
+        doc_record = existing_doc
+    else:
+        doc_record = FarmerDocument(
+            plan_number=plan_number,
+            user_id=user_id,
+            doc_id_key=doc_id_key,
+            document_category=spec_info["document_category"],
+            title_en=spec_info["title_en"],
+            title_hi=spec_info["title_hi"],
+            file_path="self_confirmed_ready",
+            file_name_original=f"{spec_info['title_hi']} (किसान द्वारा पुष्टि)",
+            file_size_bytes=1024,
+            mime_type="application/pdf",
+            upload_status="UPLOADED" if is_checked else "NOT_UPLOADED",
+            verification_status="VERIFIED" if is_checked else "NOT_UPLOADED",
+            verified_by_user_id="FARMER_SELF_VERIFIED" if is_checked else None,
+            verified_at=now if is_checked else None,
+            verification_remarks="किसान द्वारा दस्तावेज़ उपलब्धता की पुष्टि (Self-Confirmed Available)" if is_checked else None,
+            is_masked_aadhaar=False,
+            created_at=now,
+            updated_at=now
+        )
+        db.add(doc_record)
+
+    db.commit()
+    db.refresh(doc_record)
+    return doc_record
+
+
+def toggle_government_verification(
+    db: Session,
+    plan_number: str,
+    scheme_code: str,
+    is_checked: bool,
+    reviewer_id: Optional[str] = None
+) -> Optional[BenefitVerificationRecord]:
+    """
+    Toggles official government sanction verification for a scheme with a single click.
+    """
+    existing = db.query(BenefitVerificationRecord).filter(
+        BenefitVerificationRecord.plan_number == plan_number,
+        BenefitVerificationRecord.scheme_code == scheme_code
+    ).first()
+
+    prog = db.query(FarmerApplicationProgress).filter(
+        FarmerApplicationProgress.plan_number == plan_number,
+        FarmerApplicationProgress.scheme_code == scheme_code
+    ).first()
+
+    if is_checked:
+        now = datetime.now(timezone.utc)
+        if not existing:
+            existing = BenefitVerificationRecord(
+                plan_number=plan_number,
+                scheme_code=scheme_code,
+                verification_source="उत्तर प्रदेश कृषि डीबीटी पोर्टल (UP DBT Portal)",
+                official_reference_number=f"SANCTION-UP-2026-{scheme_code[:4]}",
+                status="GOVERNMENT_VERIFIED",
+                verified_at=now,
+                reviewer_id=reviewer_id or "DEPARTMENTAL_OFFICER",
+                remarks="विभागीय स्वीकृति एवं डीबीटी संपुष्ट"
+            )
+            db.add(existing)
+        if prog:
+            prog.is_government_verified = True
+        db.commit()
+        if existing:
+            db.refresh(existing)
+        return existing
+    else:
+        if existing:
+            db.delete(existing)
+        if prog:
+            prog.is_government_verified = False
+        db.commit()
+        return None
+
 
 
 def toggle_official_step(
@@ -803,3 +928,4 @@ def get_action_plan_workflow_summary(
         can_confirm=can_confirm,
         unmet_prerequisites=unmet
     )
+

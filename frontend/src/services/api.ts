@@ -585,6 +585,42 @@ export const api = {
     return data;
   },
 
+  async toggleDocumentCheck(
+    planNumber: string,
+    docIdKey: string,
+    isChecked: boolean
+  ): Promise<FarmerDocumentOut> {
+    const res = await fetch(`${API_BASE}/action-plans/${planNumber}/documents/${docIdKey}/toggle`, {
+      method: 'POST',
+      headers: getHeaders(),
+      credentials: 'include',
+      body: JSON.stringify({ is_checked: isChecked }),
+    });
+    const data = await safeJson(res);
+    if (!res.ok) {
+      throw new Error(data.detail || 'दस्तावेज़ स्थिति अद्यतन विफल रही (Failed to toggle document).');
+    }
+    return data;
+  },
+
+  async toggleGovtVerification(
+    planNumber: string,
+    schemeCode: string,
+    isChecked: boolean
+  ): Promise<any> {
+    const res = await fetch(`${API_BASE}/action-plans/${planNumber}/schemes/${schemeCode}/govt-verification/toggle`, {
+      method: 'POST',
+      headers: getHeaders(),
+      credentials: 'include',
+      body: JSON.stringify({ is_checked: isChecked }),
+    });
+    const data = await safeJson(res);
+    if (!res.ok) {
+      throw new Error(data.detail || 'सरकारी संपुष्टि अद्यतन विफल रही (Failed to toggle government verification).');
+    }
+    return data;
+  },
+
   async recordGovtVerification(
     planNumber: string,
     schemeCode: string,

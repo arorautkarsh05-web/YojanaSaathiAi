@@ -14,13 +14,15 @@ from app.schemas import (
     FarmerApplicationProgressOut, FarmerApplicationProgressUpdate,
     BenefitVerificationRecordOut, BenefitVerificationCreate,
     ActionPlanConfirmationRequest, ActionPlanConfirmationResponse,
-    ActionPlanWorkflowSummaryResponse, FarmerDocumentOut
+    ActionPlanWorkflowSummaryResponse, FarmerDocumentOut,
+    DocumentToggleRequest, SchemeToggleRequest
 )
 from app.services.action_plan_service import generate_action_plan
 from app.services.document_verification_service import (
     save_farmer_document, review_farmer_document, toggle_official_step,
     update_farmer_progress, record_government_verification,
-    confirm_action_plan, get_action_plan_workflow_summary
+    confirm_action_plan, get_action_plan_workflow_summary,
+    toggle_farmer_document_tick, toggle_government_verification
 )
 from app.services.summary_pdf_service import generate_farmer_benefit_summary_pdf
 
@@ -285,6 +287,47 @@ def verify_document_endpoint(
     )
 
 
+@router.post("/{plan_number}/documents/{doc_id_key}/toggle", response_model=FarmerDocumentOut)
+def toggle_document_endpoint(
+    plan_number: str,
+    doc_id_key: str,
+    req: DocumentToggleRequest,
+    current_user: User = Depends(get_optional_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Toggles a tick-box document (Khatauni, Bank Passbook, etc.).
+    Ticking immediately marks it verified.
+    """
+    user_id = current_user.id if current_user else None
+    doc = toggle_farmer_document_tick(
+        db=db,
+        plan_number=plan_number,
+        doc_id_key=doc_id_key,
+        is_checked=req.is_checked,
+        user_id=user_id
+    )
+    return FarmerDocumentOut(
+        id=doc.id,
+        plan_number=doc.plan_number,
+        doc_id_key=doc.doc_id_key,
+        document_category=doc.document_category,
+        title_en=doc.title_en,
+        title_hi=doc.title_hi,
+        file_name_original=doc.file_name_original,
+        file_size_bytes=doc.file_size_bytes,
+        mime_type=doc.mime_type,
+        upload_status=doc.upload_status,
+        verification_status=doc.verification_status,
+        rejection_reason=doc.rejection_reason,
+        verification_remarks=doc.verification_remarks,
+        verified_at=doc.verified_at,
+        is_masked_aadhaar=doc.is_masked_aadhaar,
+        created_at=doc.created_at,
+        updated_at=doc.updated_at
+    )
+
+
 @router.post("/{plan_number}/steps/{step_number}/toggle", response_model=ActionItemCompletionOut)
 def toggle_step_endpoint(
     plan_number: str,
@@ -381,6 +424,32 @@ def record_govt_verification_endpoint(
         verified_at=record.verified_at,
         remarks=record.remarks
     )
+
+
+@router.post("/{plan_number}/schemes/{scheme_code}/govt-verification/toggle")
+def toggle_govt_verification_endpoint(
+    plan_number: str,
+    scheme_code: str,
+    req: SchemeToggleRequest,
+    current_user: User = Depends(get_optional_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Toggles official government sanction verification with a single tick.
+    """
+    reviewer_id = current_user.id if current_user else "DEPARTMENTAL_OFFICER"
+    record = toggle_government_verification(
+        db=db,
+        plan_number=plan_number,
+        scheme_code=scheme_code,
+        is_checked=req.is_checked,
+        reviewer_id=reviewer_id
+    )
+    return {
+        "status": "success",
+        "is_verified": req.is_checked,
+        "scheme_code": scheme_code
+    }
 
 
 @router.post("/{plan_number}/confirm", response_model=ActionPlanConfirmationResponse)

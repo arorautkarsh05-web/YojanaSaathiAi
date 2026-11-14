@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { UserCheck } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
+import { UserCheck, CheckSquare, Square, CheckCircle2, Clock } from 'lucide-react';
 import { api } from '../../services/api';
 import type { 
   SchemeEvaluation, 
@@ -15,16 +14,6 @@ interface FarmerApplicationProgressViewProps {
   onWorkflowUpdate: () => void;
 }
 
-const STATUS_OPTIONS = [
-  { value: 'NOT_YET_APPLIED', label_hi: 'आवेदन अभी नहीं किया (Not Yet Applied)', label_en: 'Not Yet Applied' },
-  { value: 'APPLICATION_SUBMITTED', label_hi: 'आवेदन जमा किया गया (Application Submitted)', label_en: 'Application Submitted' },
-  { value: 'ACKNOWLEDGEMENT_RECEIVED', label_hi: 'पावती / रसीद प्राप्त हुई (Acknowledgement Received)', label_en: 'Acknowledgement Received' },
-  { value: 'UNDER_REVIEW', label_hi: 'विभागीय समीक्षाधीन (Under Review)', label_en: 'Under Review' },
-  { value: 'ADDITIONAL_INFO_REQUESTED', label_hi: 'अतिरिक्त जानकारी मांगी गई (Additional Info Requested)', label_en: 'Additional Info Requested' },
-  { value: 'APPLICATION_REJECTED', label_hi: 'आवेदन निरस्त / आपत्ति (Application Rejected)', label_en: 'Application Rejected' },
-  { value: 'BENEFIT_RECEIVED', label_hi: 'लाभ / डीबीटी प्राप्त हुआ (Benefit Received)', label_en: 'Benefit Received' },
-];
-
 export const FarmerApplicationProgressView: React.FC<FarmerApplicationProgressViewProps> = ({
   planNumber,
   selectedSchemes,
@@ -35,31 +24,23 @@ export const FarmerApplicationProgressView: React.FC<FarmerApplicationProgressVi
   const isHindi = (i18n.resolvedLanguage || i18n.language || 'hi').startsWith('hi');
 
   const [savingScheme, setSavingScheme] = useState<string | null>(null);
-  const [formData, setFormData] = useState<Record<string, { status: string; appRef: string; remarks: string }>>({});
 
   const progressMap = new Map<string, FarmerApplicationProgressOut>();
   applicationProgress.forEach(p => progressMap.set(p.scheme_code, p));
 
-  const getFormState = (code: string) => {
-    if (formData[code]) return formData[code];
-    const existing = progressMap.get(code);
-    return {
-      status: existing?.status || 'NOT_YET_APPLIED',
-      appRef: existing?.application_reference_number || '',
-      remarks: existing?.farmer_remarks || '',
-    };
-  };
-
-  const handleUpdate = async (code: string) => {
-    const state = getFormState(code);
+  const handleToggleSchemeProgress = async (code: string, isCurrentlySubmitted: boolean) => {
     setSavingScheme(code);
     try {
+      const nextStatus = isCurrentlySubmitted ? 'NOT_YET_APPLIED' : 'APPLICATION_SUBMITTED';
+      const appRef = isCurrentlySubmitted ? '' : `UP-APP-${code.slice(0, 4)}-${Date.now().toString().slice(-4)}`;
+      const remarks = isCurrentlySubmitted ? '' : 'किसान द्वारा आवेदन पूर्ण एवं जमा संपुष्ट';
+
       await api.updateSchemeProgress(
         planNumber,
         code,
-        state.status,
-        state.appRef,
-        state.remarks
+        nextStatus,
+        appRef,
+        remarks
       );
       onWorkflowUpdate();
     } catch (err) {
@@ -69,6 +50,12 @@ export const FarmerApplicationProgressView: React.FC<FarmerApplicationProgressVi
     }
   };
 
+  const totalSchemes = selectedSchemes.length;
+  const submittedSchemes = selectedSchemes.filter(s => {
+    const prog = progressMap.get(s.scheme_code);
+    return prog && prog.status !== 'NOT_YET_APPLIED';
+  }).length;
+
   return (
     <div className="space-y-6">
       {/* Notice */}
@@ -76,14 +63,33 @@ export const FarmerApplicationProgressView: React.FC<FarmerApplicationProgressVi
         <UserCheck className="w-5 h-5 text-forest-700 shrink-0 mt-0.5" />
         <div className="space-y-1">
           <div className="font-bold text-forest-900 text-sm">
-            {isHindi ? 'चरण 6: किसान द्वारा दर्ज आवेदन प्रगति (Farmer-Reported Progress)' : 'Stage 6: Farmer-Reported Application Progress'}
+            {isHindi ? 'चरण 6: किसान द्वारा दर्ज आवेदन प्रगति (1-क्लिक पुष्टि)' : 'Stage 6: Farmer-Reported Progress (1-Click Confirmation)'}
           </div>
           <p className="leading-relaxed">
             {isHindi
-              ? 'यह अनुभाग किसान को सरकारी पोर्टल पर किए गए अपने आवेदनों की वर्तमान स्थिति दर्ज करने की सुविधा देता है। यह स्थिति पूर्णतः किसान द्वारा स्वयं घोषित (Self-Reported) है और सरकारी डाटाबेस द्वारा स्वचालित रूप से सत्यापित नहीं मानी जाती।'
-              : 'This section allows farmers to record their real application progress made across official portals. All statuses here are self-reported by the farmer and distinguished from official government verification.'}
+              ? 'जैसे ही आप संबंधित सरकारी पोर्टल पर आवेदन कर लें, नीचे दिए गए टिक-बॉक्स पर क्लिक करके अपनी आवेदन स्थिति संपुष्ट करें।'
+              : 'Once you have applied on the respective government portal, tick the checkbox to confirm your application status.'}
           </p>
         </div>
+      </div>
+
+      {/* Counter */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-natural bg-field-100/70 border border-forest-800/30">
+        <div>
+          <div className="text-xs font-bold uppercase tracking-wider text-forest-800">
+            {isHindi ? 'चरण 6 प्रगति स्थिति' : 'Stage 6 Progress'}
+          </div>
+          <div className="text-sm font-semibold text-forest-950 mt-0.5">
+            {isHindi ? 'योजना आवेदन संपुष्टि' : 'Scheme Application Confirmation'}
+          </div>
+        </div>
+        <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
+          submittedSchemes === totalSchemes && totalSchemes > 0
+            ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
+            : 'bg-amber-100 text-amber-900 border-amber-300'
+        }`}>
+          {submittedSchemes} / {totalSchemes} {isHindi ? 'आवेदन दर्ज' : 'Applied'}
+        </span>
       </div>
 
       {/* Scheme Progress Cards */}
@@ -91,15 +97,19 @@ export const FarmerApplicationProgressView: React.FC<FarmerApplicationProgressVi
         {selectedSchemes.map(scheme => {
           const code = scheme.scheme_code;
           const currentProgress = progressMap.get(code);
-          const formState = getFormState(code);
+          const isSubmitted = !!currentProgress && currentProgress.status !== 'NOT_YET_APPLIED';
           const isSaving = savingScheme === code;
 
           return (
             <div
               key={code}
-              className="p-5 rounded-natural border border-appBorder bg-white/90 shadow-2xs space-y-4 text-xs"
+              className={`p-4 rounded-natural border transition-all text-xs space-y-3 ${
+                isSubmitted
+                  ? 'bg-emerald-50/60 border-emerald-300 shadow-2xs'
+                  : 'bg-white/90 border-appBorder'
+              }`}
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-appBorder pb-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-mono font-bold text-forest-900 bg-paper-200 px-2 py-0.5 rounded text-[11px]">
@@ -114,83 +124,56 @@ export const FarmerApplicationProgressView: React.FC<FarmerApplicationProgressVi
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 self-start sm:self-auto">
-                  <span className="text-[10px] font-bold px-2 py-1 rounded bg-amber-50 text-amber-900 border border-amber-200">
-                    {isHindi ? 'स्वयं दर्ज स्थिति (Self-Reported)' : 'Self-Reported'}
-                  </span>
-                </div>
-              </div>
+                <div className="flex items-center gap-2">
+                  {/* Status Badge */}
+                  {isSubmitted ? (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
+                      {isHindi ? 'आवेदन जमा (Submitted)' : 'SUBMITTED'}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-paper-200 text-muted-dark border border-appBorder">
+                      <Clock className="w-3.5 h-3.5" />
+                      {isHindi ? 'आवेदन अभी नहीं किया' : 'NOT APPLIED'}
+                    </span>
+                  )}
 
-              {/* Progress Inputs */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="space-y-1">
-                  <label className="font-semibold text-ink-950 block text-[11px]">
-                    {isHindi ? 'वर्तमान आवेदन स्थिति:' : 'Application Status:'}
-                  </label>
-                  <select
-                    value={formState.status}
-                    onChange={e => setFormData({
-                      ...formData,
-                      [code]: { ...formState, status: e.target.value }
-                    })}
-                    className="w-full text-xs p-2 rounded border border-appBorder bg-paper-50 text-ink-950"
+                  {/* 1-Click Interactive Tick Box */}
+                  <button
+                    type="button"
+                    disabled={isSaving}
+                    onClick={() => handleToggleSchemeProgress(code, isSubmitted)}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-natural border font-semibold text-xs transition-all shadow-2xs ${
+                      isSubmitted
+                        ? 'bg-emerald-100 text-emerald-950 border-emerald-400 hover:bg-emerald-200/80'
+                        : 'bg-white text-ink-950 border-appBorder hover:border-forest-700 hover:bg-field-50'
+                    }`}
                   >
-                    {STATUS_OPTIONS.map(opt => (
-                      <option key={opt.value} value={opt.value}>
-                        {isHindi ? opt.label_hi : opt.label_en}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-semibold text-ink-950 block text-[11px]">
-                    {isHindi ? 'आवेदन / पावती संदर्भ संख्या:' : 'Application / Ack Ref #:'}
-                  </label>
-                  <input
-                    type="text"
-                    value={formState.appRef}
-                    onChange={e => setFormData({
-                      ...formData,
-                      [code]: { ...formState, appRef: e.target.value }
-                    })}
-                    placeholder={isHindi ? 'उदा. UP-AGRI-2026-XXXX' : 'e.g. UP-AGRI-2026-XXXX'}
-                    className="w-full text-xs p-2 rounded border border-appBorder bg-white font-mono text-ink-950"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="font-semibold text-ink-950 block text-[11px]">
-                    {isHindi ? 'टिप्पणी / स्थिति विवरण:' : 'Remarks / Note:'}
-                  </label>
-                  <input
-                    type="text"
-                    value={formState.remarks}
-                    onChange={e => setFormData({
-                      ...formData,
-                      [code]: { ...formState, remarks: e.target.value }
-                    })}
-                    placeholder={isHindi ? 'उदा. तहसील में लेखपाल सत्यापन पूर्ण' : 'e.g. Lekhpal verified at Tehsil'}
-                    className="w-full text-xs p-2 rounded border border-appBorder bg-white text-ink-950"
-                  />
+                    {isSubmitted ? (
+                      <CheckSquare className="w-4 h-4 text-emerald-700 shrink-0" />
+                    ) : (
+                      <Square className="w-4 h-4 text-muted hover:text-forest-800 shrink-0" />
+                    )}
+                    <span>
+                      {isSubmitted 
+                        ? (isHindi ? 'आवेदन जमा संपुष्ट ✓' : 'Application Confirmed ✓') 
+                        : (isHindi ? 'आवेदन जमा चिह्नित करें' : 'Mark as Applied')}
+                    </span>
+                  </button>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between pt-1">
-                <div className="text-[10px] text-muted font-mono">
-                  {currentProgress?.updated_at && (
-                    <span>अंतिम अद्यतन: {new Date(currentProgress.updated_at).toLocaleDateString()}</span>
+              {/* Reference Details if submitted */}
+              {isSubmitted && currentProgress?.application_reference_number && (
+                <div className="p-2 rounded bg-white/80 border border-emerald-200 text-[11px] font-mono text-emerald-900 flex items-center justify-between">
+                  <span>पावती संदर्भ: {currentProgress.application_reference_number}</span>
+                  {currentProgress.updated_at && (
+                    <span className="text-[10px] text-muted font-sans">
+                      दिनांक: {new Date(currentProgress.updated_at).toLocaleDateString()}
+                    </span>
                   )}
                 </div>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  isLoading={isSaving}
-                  onClick={() => handleUpdate(code)}
-                >
-                  {isHindi ? 'प्रगति सहेजें' : 'Save Progress'}
-                </Button>
-              </div>
+              )}
             </div>
           );
         })}

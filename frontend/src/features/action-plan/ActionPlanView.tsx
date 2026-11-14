@@ -86,10 +86,22 @@ export const ActionPlanView: React.FC<ActionPlanViewProps> = ({ planData, onBack
     d => d.is_mandatory && uploadedDocs.some(u => u.doc_id_key === d.doc_id_key && u.verification_status === 'VERIFIED')
   ).length;
 
+  const totalSchemes = planData.selected_schemes.length;
+  const submittedSchemesCount = planData.selected_schemes.filter(s =>
+    applicationProgress.some(p => p.scheme_code === s.scheme_code && p.status !== 'NOT_YET_APPLIED')
+  ).length;
+
+  const verifiedGovtSchemesCount = planData.selected_schemes.filter(s =>
+    govtVerifications.some(v => v.scheme_code === s.scheme_code)
+  ).length;
+
   const completedStepsCount = actionSteps.filter(s => s.is_completed).length;
-  const isStage4Complete = verifiedMandatoryDocs === totalMandatoryDocs && totalMandatoryDocs > 0;
-  const isStage5Complete = completedStepsCount > 0 && completedStepsCount >= actionSteps.length;
-  const isStage7Complete = govtVerifications.length > 0;
+  const isStage4Complete = totalMandatoryDocs > 0 && verifiedMandatoryDocs >= totalMandatoryDocs;
+  const isStage5Complete = actionSteps.length > 0 && completedStepsCount >= actionSteps.length;
+  const isStage6Complete = totalSchemes > 0 && submittedSchemesCount >= totalSchemes;
+  const isStage7Complete = totalSchemes > 0 && verifiedGovtSchemesCount >= totalSchemes;
+
+  const all7StagesComplete = isStage4Complete && isStage5Complete && isStage6Complete && isStage7Complete;
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 print:p-0">
@@ -105,10 +117,18 @@ export const ActionPlanView: React.FC<ActionPlanViewProps> = ({ planData, onBack
             size="sm"
             leftIcon={<FileCheck className="w-4 h-4" />}
             onClick={() => setIsConfirmationModalOpen(true)}
-            className="bg-emerald-800 hover:bg-emerald-900 border-emerald-950 text-white"
+            className={
+              confirmation
+                ? "bg-emerald-800 hover:bg-emerald-900 border-emerald-950 text-white"
+                : all7StagesComplete
+                ? "bg-emerald-700 hover:bg-emerald-800 border-emerald-900 text-white ring-2 ring-emerald-400/50 shadow-md animate-pulse"
+                : "bg-emerald-800 hover:bg-emerald-900 border-emerald-950 text-white"
+            }
           >
             {confirmation
               ? (isHindi ? 'संक्षिप्त लाभ संक्षेप (देखें)' : 'View Benefit Summary')
+              : all7StagesComplete
+              ? (isHindi ? 'अंतिम संपुष्टि करें (7/7 पूर्ण) ✓' : 'Confirm Final Plan (7/7 Complete) ✓')
               : (isHindi ? 'कार्य योजना संपुष्ट करें' : 'Confirm Action Plan')}
           </Button>
 
@@ -176,7 +196,9 @@ export const ActionPlanView: React.FC<ActionPlanViewProps> = ({ planData, onBack
             <span className="text-[11px] font-semibold text-leaf-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
               {confirmation 
                 ? (isHindi ? 'योजना संपुष्ट ✓' : 'Plan Confirmed ✓')
-                : (isHindi ? 'चरण 4-5 सक्रिय' : 'Stages 4-5 Active')}
+                : all7StagesComplete
+                ? (isHindi ? 'सभी 7 चरण पूर्ण ✓ (संपुष्टि योग्य)' : 'All 7 Stages Complete ✓ (Ready)')
+                : (isHindi ? 'चरण 4-7 प्रगति पर' : 'Stages 4-7 in Progress')}
             </span>
           </div>
 
@@ -223,19 +245,23 @@ export const ActionPlanView: React.FC<ActionPlanViewProps> = ({ planData, onBack
               <div className="text-xs font-bold text-forest-900 mb-0.5">
                 5. आधिकारिक कदम {isStage5Complete ? '✓' : `(${completedStepsCount}/${actionSteps.length})`}
               </div>
-              <div>{isHindi ? 'पोर्टल निर्देश' : 'Official Portal'}</div>
+              <div>{isHindi ? (isStage5Complete ? 'कदम पूर्ण' : 'पोर्टल निर्देश') : 'Official Portal'}</div>
             </button>
             <button
               type="button"
               onClick={() => setActiveTab('farmer_progress')}
               className={`p-2 rounded border font-medium transition-all text-left ${
-                activeTab === 'farmer_progress'
+                isStage6Complete
+                  ? 'bg-emerald-100/80 border-emerald-300 text-emerald-950'
+                  : activeTab === 'farmer_progress'
                   ? 'bg-field-100 border-forest-800 text-forest-950 ring-2 ring-forest-700/30'
                   : 'bg-white border-appBorder text-ink-950'
               }`}
             >
-              <div className="text-xs font-bold text-forest-900 mb-0.5">6. किसान प्रगति</div>
-              <div>{isHindi ? 'स्वयं दर्ज स्थिति' : 'Farmer Reported'}</div>
+              <div className="text-xs font-bold text-forest-900 mb-0.5">
+                6. किसान प्रगति {isStage6Complete ? '✓' : `(${submittedSchemesCount}/${totalSchemes})`}
+              </div>
+              <div>{isHindi ? (isStage6Complete ? 'आवेदन संपुष्ट' : 'स्वयं दर्ज स्थिति') : 'Farmer Reported'}</div>
             </button>
             <button
               type="button"
@@ -249,7 +275,7 @@ export const ActionPlanView: React.FC<ActionPlanViewProps> = ({ planData, onBack
               }`}
             >
               <div className="text-xs font-bold text-forest-900 mb-0.5">
-                7. लाभ संपुष्टि {isStage7Complete ? '✓' : ''}
+                7. लाभ संपुष्टि {isStage7Complete ? '✓' : `(${verifiedGovtSchemesCount}/${totalSchemes})`}
               </div>
               <div>{isHindi ? (isStage7Complete ? 'विभागीय स्वीकृत' : 'सत्यापन प्रतीक्षित') : 'Govt Sanction'}</div>
             </button>
@@ -277,7 +303,7 @@ export const ActionPlanView: React.FC<ActionPlanViewProps> = ({ planData, onBack
             }`}
           >
             <ClipboardCheck className="w-4 h-4" />
-            <span>4. दस्तावेज़ सत्यापन केंद्र ({verifiedMandatoryDocs}/{totalMandatoryDocs})</span>
+            <span>4. दस्तावेज़ सत्यापन ({verifiedMandatoryDocs}/{totalMandatoryDocs}) {isStage4Complete ? '✓' : ''}</span>
           </button>
 
           <button
@@ -290,7 +316,7 @@ export const ActionPlanView: React.FC<ActionPlanViewProps> = ({ planData, onBack
             }`}
           >
             <CheckCircle2 className="w-4 h-4" />
-            <span>5. आधिकारिक आवेदन कदम ({completedStepsCount}/{actionSteps.length})</span>
+            <span>5. आधिकारिक आवेदन कदम ({completedStepsCount}/{actionSteps.length}) {isStage5Complete ? '✓' : ''}</span>
           </button>
 
           <button
@@ -303,7 +329,7 @@ export const ActionPlanView: React.FC<ActionPlanViewProps> = ({ planData, onBack
             }`}
           >
             <UserCheck className="w-4 h-4" />
-            <span>6. किसान प्रगति ट्रैकर</span>
+            <span>6. किसान प्रगति ट्रैकर ({submittedSchemesCount}/{totalSchemes}) {isStage6Complete ? '✓' : ''}</span>
           </button>
 
           <button
@@ -316,7 +342,7 @@ export const ActionPlanView: React.FC<ActionPlanViewProps> = ({ planData, onBack
             }`}
           >
             <Building2 className="w-4 h-4" />
-            <span>7. सरकारी सत्यापन स्थिति</span>
+            <span>7. सरकारी सत्यापन स्थिति ({verifiedGovtSchemesCount}/{totalSchemes}) {isStage7Complete ? '✓' : ''}</span>
           </button>
 
           <button
@@ -448,12 +474,14 @@ export const ActionPlanView: React.FC<ActionPlanViewProps> = ({ planData, onBack
             <div className="font-bold text-forest-950 text-sm">
               {confirmation 
                 ? (isHindi ? 'कार्य योजना संपुष्ट संदर्भ: ' + confirmation.summary_ref_id : 'Confirmed Ref: ' + confirmation.summary_ref_id)
+                : all7StagesComplete
+                ? (isHindi ? 'सभी 7 चरण पूर्ण! अंतिम संपुष्टि के लिए तैयार' : 'All 7 Stages Complete! Ready for Final Confirmation')
                 : (isHindi ? 'कार्य योजना की अंतिम संपुष्टि' : 'Final Action Plan Confirmation')}
             </div>
             <p className="text-xs text-muted-dark mt-0.5">
               {isHindi
-                ? 'सभी अनिवार्य दस्तावेज़ सत्यापित होने पर अपनी योजना संपुष्ट करें और 1-पेज लाभ संक्षेप प्राप्त करें।'
-                : 'Confirm roadmap once all mandatory documents are verified and download the 1-page summary.'}
+                ? 'सभी अनिवार्य दस्तावेज़ सत्यापित और आधिकारिक चरण पूर्ण होने पर अपनी योजना संपुष्ट करें और 1-पेज लाभ संक्षेप प्राप्त करें।'
+                : 'Confirm roadmap once all mandatory documents and stages are completed and download the 1-page summary.'}
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
@@ -462,9 +490,18 @@ export const ActionPlanView: React.FC<ActionPlanViewProps> = ({ planData, onBack
               size="sm"
               leftIcon={<FileCheck className="w-4 h-4" />}
               onClick={() => setIsConfirmationModalOpen(true)}
+              className={
+                confirmation
+                  ? "bg-emerald-800 hover:bg-emerald-900 border-emerald-950 text-white"
+                  : all7StagesComplete
+                  ? "bg-emerald-700 hover:bg-emerald-800 border-emerald-900 text-white ring-2 ring-emerald-400/50 shadow-md animate-pulse"
+                  : "bg-emerald-800 hover:bg-emerald-900 border-emerald-950 text-white"
+              }
             >
               {confirmation
                 ? (isHindi ? 'विवरण देखें' : 'View Confirmation')
+                : all7StagesComplete
+                ? (isHindi ? 'अंतिम संपुष्टि करें (7/7 पूर्ण) ✓' : 'Confirm Final Plan (7/7 Complete) ✓')
                 : (isHindi ? 'कार्य योजना संपुष्ट करें' : 'Confirm Action Plan')}
             </Button>
           </div>

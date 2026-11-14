@@ -279,6 +279,12 @@ class DocumentVerifyRequest(BaseModel):
     rejection_reason: Optional[str] = None
     remarks: Optional[str] = None
 
+class DocumentToggleRequest(BaseModel):
+    is_checked: bool
+
+class SchemeToggleRequest(BaseModel):
+    is_checked: bool
+
 class ActionItemCompletionOut(BaseModel):
     id: str
     plan_number: str

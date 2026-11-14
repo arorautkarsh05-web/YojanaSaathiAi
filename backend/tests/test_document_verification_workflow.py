@@ -97,29 +97,28 @@ def test_complete_action_plan_verification_workflow(client):
     assert wf_data["can_confirm"] is False
     assert len(wf_data["unmet_prerequisites"]) > 0
 
-    # 3. Upload documents
-    # A) Khatauni (PDF)
+    # 3. Document verification via 1-click tick-box and file upload
     fake_pdf = b"%PDF-1.5 \n1 0 obj\n<<>>\nendobj\ntrailer\n<<>>\n%%EOF"
-    upload_res = client.post(
-        f"/api/v1/action-plans/{plan_number}/documents/upload",
-        data={"doc_id_key": "doc_khatauni"},
-        files={"file": ("up_khatauni.pdf", io.BytesIO(fake_pdf), "application/pdf")}
-    )
-    assert upload_res.status_code == 200
-    khatauni_doc = upload_res.json()["document"]
-    assert khatauni_doc["verification_status"] == "UNDER_REVIEW"
 
-    # B) Bank Passbook (JPEG)
-    fake_jpg = b"\xFF\xD8\xFF\xE0\x00\x10JFIF\x00\x01\x01\x01\x00\x60\x00\x60\x00\x00\xFF\xDB\x00C\x00\xFF\xD9"
-    upload_res2 = client.post(
-        f"/api/v1/action-plans/{plan_number}/documents/upload",
-        data={"doc_id_key": "doc_bank_passbook"},
-        files={"file": ("bank_passbook.jpg", io.BytesIO(fake_jpg), "image/jpeg")}
+    # A) Khatauni via 1-click tick-box toggle
+    tick_res = client.post(
+        f"/api/v1/action-plans/{plan_number}/documents/doc_khatauni/toggle",
+        json={"doc_id_key": "doc_khatauni", "is_checked": True}
     )
-    assert upload_res2.status_code == 200
-    bank_doc = upload_res2.json()["document"]
+    assert tick_res.status_code == 200
+    khatauni_doc = tick_res.json()
+    assert khatauni_doc["verification_status"] == "VERIFIED"
 
-    # C) Aadhaar (PDF)
+    # B) Bank Passbook via 1-click tick-box toggle
+    tick_res2 = client.post(
+        f"/api/v1/action-plans/{plan_number}/documents/doc_bank_passbook/toggle",
+        json={"doc_id_key": "doc_bank_passbook", "is_checked": True}
+    )
+    assert tick_res2.status_code == 200
+    bank_doc = tick_res2.json()
+    assert bank_doc["verification_status"] == "VERIFIED"
+
+    # C) Aadhaar Upload (Auto-verified on upload)
     upload_res3 = client.post(
         f"/api/v1/action-plans/{plan_number}/documents/upload",
         data={"doc_id_key": "doc_aadhaar"},
@@ -127,8 +126,9 @@ def test_complete_action_plan_verification_workflow(client):
     )
     assert upload_res3.status_code == 200
     aadhaar_doc = upload_res3.json()["document"]
+    assert aadhaar_doc["verification_status"] == "VERIFIED"
 
-    # D) Photo (PNG)
+    # D) Photo Upload (Auto-verified on upload)
     fake_png = b"\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR\x00\x00\x00\x01\x00\x00\x00\x01\x08\x06\x00\x00\x00\x1f\x15c4\x00\x00\x00\nIDATx\x9cc\x00\x01\x00\x00\x05\x00\x01\r\n-\xb4\x00\x00\x00\x00IEND\xaeB`\x82"
     upload_res4 = client.post(
         f"/api/v1/action-plans/{plan_number}/documents/upload",
@@ -137,8 +137,9 @@ def test_complete_action_plan_verification_workflow(client):
     )
     assert upload_res4.status_code == 200
     photo_doc = upload_res4.json()["document"]
+    assert photo_doc["verification_status"] == "VERIFIED"
 
-    # 4. Reviewer verification actions
+    # 4. Reviewer verification actions (Backend capability test)
     # Test rejection without reason fails
     reject_fail = client.post(
         f"/api/v1/action-plans/{plan_number}/documents/{khatauni_doc['id']}/verify",
@@ -146,7 +147,7 @@ def test_complete_action_plan_verification_workflow(client):
     )
     assert reject_fail.status_code == 400
 
-    # Approve all 4 documents
+    # Ensure all 4 documents remain VERIFIED
     for doc in [khatauni_doc, bank_doc, aadhaar_doc, photo_doc]:
         app_res = client.post(
             f"/api/v1/action-plans/{plan_number}/documents/{doc['id']}/verify",
@@ -184,7 +185,14 @@ def test_complete_action_plan_verification_workflow(client):
     assert prog_res.json()["status"] == "APPLICATION_SUBMITTED"
     assert prog_res.json()["is_government_verified"] is False
 
-    # 7. Departmental Government Verification Recording
+    # 7. Departmental Government Verification Recording (and 1-click toggle)
+    govt_toggle_res = client.post(
+        f"/api/v1/action-plans/{plan_number}/schemes/PM_KISAN/govt-verification/toggle",
+        json={"scheme_code": "PM_KISAN", "is_checked": True}
+    )
+    assert govt_toggle_res.status_code == 200
+    assert govt_toggle_res.json()["is_verified"] is True
+
     govt_res = client.post(
         f"/api/v1/action-plans/{plan_number}/schemes/PM_KISAN/govt-verification",
         json={

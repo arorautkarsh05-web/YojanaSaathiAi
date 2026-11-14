@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
-  Upload, CheckCircle2, AlertTriangle, XCircle, RefreshCw, 
-  Download, ShieldCheck, Info
+  Upload, CheckCircle2, XCircle, 
+  Download, ShieldCheck, Info, CheckSquare, Square
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { api } from '../../services/api';
@@ -18,15 +18,6 @@ interface DocumentVerificationCenterProps {
   onWorkflowUpdate: () => void;
 }
 
-const REJECTION_REASONS = [
-  'दस्तावेज़ स्पष्ट या पढ़ने योग्य नहीं है (Blurred or Unreadable Document)',
-  'नाम या व्यक्तिगत विवरण में विसंगति (Name or Profile Mismatch)',
-  'दस्तावेज़ की वैधता समाप्त हो चुकी है (Document Expired)',
-  'गलत या अधूरा दस्तावेज़ अपलोड किया गया (Incorrect or Incomplete Document)',
-  'राजस्व मुहर या डिजिटल हस्ताक्षर अनुपलब्ध (Missing Revenue Seal or Digital Signature)',
-  'आधार संख्या अस्पष्ट या गैर-मास्क्ड (Aadhaar Number Unclear or Unmasked)',
-];
-
 export const DocumentVerificationCenter: React.FC<DocumentVerificationCenterProps> = ({
   planNumber,
   requiredDocs,
@@ -37,21 +28,36 @@ export const DocumentVerificationCenter: React.FC<DocumentVerificationCenterProp
   const isHindi = (i18n.resolvedLanguage || i18n.language || 'hi').startsWith('hi');
 
   const [uploadingDocKey, setUploadingDocKey] = useState<string | null>(null);
+  const [togglingDocKey, setTogglingDocKey] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-
-  // Reviewer Simulation Panel State
-  const [reviewerModalDoc, setReviewerModalDoc] = useState<FarmerDocumentOut | null>(null);
-  const [reviewerAction, setReviewerAction] = useState<'APPROVE' | 'REJECT' | 'REQUEST_REUPLOAD'>('APPROVE');
-  const [selectedReason, setSelectedReason] = useState<string>(REJECTION_REASONS[0]);
-  const [reviewerRemarks, setReviewerRemarks] = useState<string>('');
-  const [isReviewing, setIsReviewing] = useState<boolean>(false);
 
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
 
   const uploadedMap = new Map<string, FarmerDocumentOut>();
   uploadedDocs.forEach(d => uploadedMap.set(d.doc_id_key, d));
 
+  // Toggling a non-upload document (Khatauni, Bank Passbook, etc.)
+  const handleToggleCheck = async (docKey: string, currentlyVerified: boolean) => {
+    setErrorMessage(null);
+    setSuccessMessage(null);
+    setTogglingDocKey(docKey);
+    try {
+      await api.toggleDocumentCheck(planNumber, docKey, !currentlyVerified);
+      setSuccessMessage(
+        !currentlyVerified
+          ? (isHindi ? 'दस्तावेज़ की पुष्टि दर्ज कर ली गई और सत्यापित चिह्नित हुआ!' : 'Document confirmed and verified!')
+          : (isHindi ? 'दस्तावेज़ स्थिति रीसेट की गई।' : 'Document status reset.')
+      );
+      onWorkflowUpdate();
+    } catch (err: any) {
+      setErrorMessage(err.message || 'स्थिति बदलने में विफल');
+    } finally {
+      setTogglingDocKey(null);
+    }
+  };
+
+  // Uploading Aadhaar or Photo (Auto-verified immediately)
   const handleFileChange = async (docKey: string, file: File | null) => {
     if (!file) return;
     setErrorMessage(null);
@@ -75,38 +81,16 @@ export const DocumentVerificationCenter: React.FC<DocumentVerificationCenterProp
     setUploadingDocKey(docKey);
     try {
       await api.uploadDocument(planNumber, docKey, file);
-      setSuccessMessage(isHindi ? 'दस्तावेज़ सफलतापूर्वक अपलोड हुआ! समीक्षाधीन है।' : 'Document uploaded successfully! Under review.');
+      setSuccessMessage(
+        isHindi 
+          ? 'दस्तावेज़ सफलतापूर्वक अपलोड हुआ और स्वचालित रूप से सत्यापित (VERIFIED) कर दिया गया!' 
+          : 'Document uploaded and auto-verified successfully!'
+      );
       onWorkflowUpdate();
     } catch (err: any) {
       setErrorMessage(err.message || (isHindi ? 'दस्तावेज़ अपलोड विफल रहा।' : 'Upload failed.'));
     } finally {
       setUploadingDocKey(null);
-    }
-  };
-
-  const handleReviewerSubmit = async () => {
-    if (!reviewerModalDoc) return;
-    setIsReviewing(true);
-    setErrorMessage(null);
-    try {
-      await api.verifyDocument(
-        planNumber,
-        reviewerModalDoc.id,
-        reviewerAction,
-        reviewerAction !== 'APPROVE' ? selectedReason : undefined,
-        reviewerRemarks || (reviewerAction === 'APPROVE' ? 'सत्यापित एवं प्रामाणिक' : undefined)
-      );
-      setSuccessMessage(
-        isHindi 
-          ? `दस्तावेज़ की समीक्षा पूर्ण: ${reviewerAction === 'APPROVE' ? 'स्वीकृत (VERIFIED)' : 'अस्वीकृत / पुनः अपलोड'}`
-          : `Review recorded: ${reviewerAction}`
-      );
-      setReviewerModalDoc(null);
-      onWorkflowUpdate();
-    } catch (err: any) {
-      setErrorMessage(err.message || 'समीक्षा विफल रही');
-    } finally {
-      setIsReviewing(false);
     }
   };
 
@@ -122,12 +106,12 @@ export const DocumentVerificationCenter: React.FC<DocumentVerificationCenterProp
         <ShieldCheck className="w-5 h-5 text-forest-800 shrink-0 mt-0.5" />
         <div className="space-y-1">
           <div className="font-bold text-forest-900 text-sm">
-            {isHindi ? 'दस्तावेज़ सुरक्षा एवं आधार गोपनीयता परामर्श (Privacy Advisory)' : 'Document Security & Aadhaar Privacy Advisory'}
+            {isHindi ? 'दस्तावेज़ सुरक्षा एवं स्वचालित सत्यापन' : 'Document Security & Instant Verification'}
           </div>
           <p className="leading-relaxed text-muted-dark">
             {isHindi
-              ? 'योजना साथी AI सभी दिशा-निर्देशों में आधार की सार्वभौमिक अनिवार्यता लागू नहीं करता है। आधार केवल वहीं आवश्यक है जहां आधिकारिक डीबीटी अधिनियम के तहत कानूनी जनादेश है। सुरक्षा हेतु केवल मास्क्ड आधार (Masked Aadhaar — अंतिम 4 अंक दृश्य) अपलोड करने की अनुशंसा की जाती है।'
-              : 'Aadhaar is never universally mandatory. Upload only when legally mandated under official scheme DBT rules. Masked Aadhaar (showing only last 4 digits) is strongly recommended for applicant safety.'}
+              ? 'केवल आधार एवं फोटो के लिए फ़ाइल अपलोड आवश्यक है (अपलोड होते ही स्वचालित सत्यापित हो जाती है)। खतौनी, बैंक पासबुक एवं अन्य दस्तावेज़ों के लिए सीधे टिक-बॉक्स पर क्लिक करके दस्तावेज़ की उपलब्धता सत्यापित करें।'
+              : 'Upload is required only for Aadhaar and Photograph (automatically verified on upload). For all other documents (Khatauni, Bank Passbook), simply click the checkbox to mark as verified.'}
           </p>
         </div>
       </div>
@@ -139,7 +123,7 @@ export const DocumentVerificationCenter: React.FC<DocumentVerificationCenterProp
             {isHindi ? 'चरण 4: दस्तावेज़ सत्यापन केंद्र' : 'Stage 4: Document Verification Centre'}
           </div>
           <div className="text-sm font-semibold text-forest-950 mt-0.5">
-            {isHindi ? 'बहु-योजना साझा दस्तावेज़ सूची' : 'Multi-Scheme Consolidated Document Checklist'}
+            {isHindi ? 'साझा दस्तावेज़ सूची (सरल 1-क्लिक सत्यापन)' : 'Consolidated Checklist (1-Click Verification)'}
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -174,18 +158,18 @@ export const DocumentVerificationCenter: React.FC<DocumentVerificationCenterProp
           const isUploaded = !!uploaded;
           const status = uploaded?.verification_status || 'NOT_UPLOADED';
           const isVerified = status === 'VERIFIED';
-          const isRejected = status === 'REJECTED';
-          const isReupload = status === 'REUPLOAD_REQUIRED';
           const isUnderReview = status === 'UNDER_REVIEW' || status === 'UPLOADED';
+
+          // File upload only for Aadhaar and Photo as instructed
+          const isUploadRequired = spec.doc_id_key === 'doc_aadhaar' || spec.doc_id_key === 'doc_photo';
+          const isToggling = togglingDocKey === spec.doc_id_key;
 
           return (
             <div
               key={spec.doc_id_key}
               className={`p-4 rounded-natural border transition-all ${
                 isVerified
-                  ? 'bg-emerald-50/50 border-emerald-300'
-                  : isRejected || isReupload
-                  ? 'bg-red-50/50 border-red-300'
+                  ? 'bg-emerald-50/60 border-emerald-300 shadow-2xs'
                   : isUnderReview
                   ? 'bg-blue-50/40 border-blue-200'
                   : 'bg-white/80 border-appBorder'
@@ -209,7 +193,12 @@ export const DocumentVerificationCenter: React.FC<DocumentVerificationCenterProp
                     )}
                     {spec.is_aadhaar && (
                       <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-200">
-                        {isHindi ? 'मास्क्ड आधार अनुशंसित' : 'Masked Aadhaar'}
+                        {isHindi ? 'मास्क्ड आधार' : 'Masked Aadhaar'}
+                      </span>
+                    )}
+                    {isUploadRequired && (
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-blue-100 text-blue-900 border border-blue-200">
+                        {isHindi ? 'फ़ाइल अपलोड' : 'File Upload'}
                       </span>
                     )}
                   </div>
@@ -240,115 +229,90 @@ export const DocumentVerificationCenter: React.FC<DocumentVerificationCenterProp
                       <span>{spec.notes_hi}</span>
                     </div>
                   )}
-
-                  {/* Rejection / Reviewer remarks notice */}
-                  {uploaded?.rejection_reason && (
-                    <div className="p-2 mt-2 rounded bg-red-100/80 border border-red-200 text-xs text-red-900 flex items-start gap-1.5">
-                      <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
-                      <div>
-                        <div className="font-bold">{isHindi ? 'पुनः जांच / अस्वीकृति कारण:' : 'Rejection Reason:'}</div>
-                        <div>{uploaded.rejection_reason}</div>
-                        {uploaded.verification_remarks && (
-                          <div className="text-[11px] text-red-800 mt-0.5 italic">टिप्पणी: {uploaded.verification_remarks}</div>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </div>
 
-                {/* Right: Upload Status & Controls */}
+                {/* Right: Tick box OR File Upload */}
                 <div className="flex flex-col sm:flex-row md:flex-col items-start md:items-end gap-2.5 shrink-0">
                   {/* Status Badge */}
                   <div className="flex items-center gap-1.5">
-                    {isVerified && (
+                    {isVerified ? (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-900 border border-emerald-300">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-700" />
                         {isHindi ? 'सत्यापित (VERIFIED)' : 'VERIFIED'}
                       </span>
-                    )}
-                    {isUnderReview && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-900 border border-blue-300">
-                        <RefreshCw className="w-3.5 h-3.5 text-blue-700 animate-spin" />
-                        {isHindi ? 'समीक्षाधीन (Under Review)' : 'UNDER REVIEW'}
-                      </span>
-                    )}
-                    {isRejected && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-900 border border-red-300">
-                        <XCircle className="w-3.5 h-3.5 text-red-700" />
-                        {isHindi ? 'अस्वीकृत (REJECTED)' : 'REJECTED'}
-                      </span>
-                    )}
-                    {isReupload && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
-                        <AlertTriangle className="w-3.5 h-3.5 text-amber-700" />
-                        {isHindi ? 'पुनः अपलोड आवश्यक' : 'REUPLOAD REQUIRED'}
-                      </span>
-                    )}
-                    {status === 'NOT_UPLOADED' && (
+                    ) : (
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-paper-200 text-muted-dark border border-appBorder">
-                        {isHindi ? 'अपलोड नहीं हुआ' : 'NOT UPLOADED'}
+                        {isHindi ? 'लंबित / असत्यापित' : 'PENDING'}
                       </span>
                     )}
                   </div>
 
-                  {/* Upload / Replace Actions */}
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      className="hidden"
-                      ref={el => { fileInputRefs.current[spec.doc_id_key] = el; }}
-                      onChange={e => {
-                        const file = e.target.files?.[0] || null;
-                        handleFileChange(spec.doc_id_key, file);
-                        e.target.value = '';
-                      }}
-                    />
-
-                    <Button
-                      variant={isUploaded ? 'secondary' : 'primary'}
-                      size="sm"
-                      leftIcon={<Upload className="w-3.5 h-3.5" />}
-                      isLoading={uploadingDocKey === spec.doc_id_key}
-                      onClick={() => fileInputRefs.current[spec.doc_id_key]?.click()}
+                  {/* Tick Box for Non-Aadhaar/Photo docs */}
+                  {!isUploadRequired ? (
+                    <button
+                      type="button"
+                      disabled={isToggling}
+                      onClick={() => handleToggleCheck(spec.doc_id_key, isVerified)}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-natural border font-semibold text-xs transition-all shadow-2xs ${
+                        isVerified
+                          ? 'bg-emerald-100 text-emerald-950 border-emerald-400 hover:bg-emerald-200/80'
+                          : 'bg-white text-ink-950 border-appBorder hover:border-forest-700 hover:bg-field-50'
+                      }`}
                     >
-                      {isUploaded 
-                        ? (isHindi ? 'दस्तावेज़ बदलें' : 'Replace') 
-                        : (isHindi ? 'फ़ाइल अपलोड करें' : 'Upload Document')}
-                    </Button>
-
-                    {/* Preview / Download if uploaded */}
-                    {isUploaded && uploaded && (
-                      <a
-                        href={api.getDocumentDownloadUrl(planNumber, uploaded.id)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-1.5 rounded border border-appBorder hover:bg-paper-100 text-forest-800 transition-colors"
-                        title={isHindi ? 'दस्तावेज़ देखें / डाउनलोड' : 'View / Download'}
-                      >
-                        <Download className="w-4 h-4" />
-                      </a>
-                    )}
-
-                    {/* Reviewer Simulation Action (Verification Officer Panel) */}
-                    {isUploaded && uploaded && (
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        className="text-[11px] text-leaf-700 border-leaf-300 hover:bg-leaf-50"
-                        onClick={() => {
-                          setReviewerModalDoc(uploaded);
-                          setReviewerAction('APPROVE');
-                          setReviewerRemarks('');
+                      {isVerified ? (
+                        <CheckSquare className="w-4 h-4 text-emerald-700 shrink-0" />
+                      ) : (
+                        <Square className="w-4 h-4 text-muted hover:text-forest-800 shrink-0" />
+                      )}
+                      <span>
+                        {isVerified 
+                          ? (isHindi ? 'दस्तावेज़ उपलब्ध व सत्यापित ✓' : 'Verified & Ready ✓') 
+                          : (isHindi ? 'दस्तावेज़ उपलब्ध चिह्नित करें' : 'Mark Document Available')}
+                      </span>
+                    </button>
+                  ) : (
+                    /* File Upload for Aadhaar and Photo with Immediate Auto-Verification */
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        className="hidden"
+                        ref={el => { fileInputRefs.current[spec.doc_id_key] = el; }}
+                        onChange={e => {
+                          const file = e.target.files?.[0] || null;
+                          handleFileChange(spec.doc_id_key, file);
+                          e.target.value = '';
                         }}
-                      >
-                        {isHindi ? 'अधिकारी समीक्षा' : 'Reviewer Action'}
-                      </Button>
-                    )}
-                  </div>
+                      />
 
-                  {/* File Metadata */}
-                  {uploaded && (
+                      <Button
+                        variant={isUploaded ? 'secondary' : 'primary'}
+                        size="sm"
+                        leftIcon={<Upload className="w-3.5 h-3.5" />}
+                        isLoading={uploadingDocKey === spec.doc_id_key}
+                        onClick={() => fileInputRefs.current[spec.doc_id_key]?.click()}
+                      >
+                        {isUploaded 
+                          ? (isHindi ? 'फ़ाइल बदलें' : 'Replace File') 
+                          : (isHindi ? 'फ़ाइल अपलोड करें (स्वतः सत्यापित)' : 'Upload File (Auto-Verify)')}
+                      </Button>
+
+                      {isUploaded && uploaded && (
+                        <a
+                          href={api.getDocumentDownloadUrl(planNumber, uploaded.id)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="p-1.5 rounded border border-appBorder hover:bg-paper-100 text-forest-800 transition-colors"
+                          title={isHindi ? 'दस्तावेज़ देखें / डाउनलोड' : 'View / Download'}
+                        >
+                          <Download className="w-4 h-4" />
+                        </a>
+                      )}
+                    </div>
+                  )}
+
+                  {/* File Metadata if uploaded */}
+                  {uploaded && isUploadRequired && (
                     <div className="text-[10px] text-muted font-mono">
                       {uploaded.file_name_original} ({(uploaded.file_size_bytes / 1024).toFixed(1)} KB)
                     </div>
@@ -359,126 +323,6 @@ export const DocumentVerificationCenter: React.FC<DocumentVerificationCenterProp
           );
         })}
       </div>
-
-      {/* Reviewer Verification Modal Dialog */}
-      {reviewerModalDoc && (
-        <div className="fixed inset-0 z-50 bg-ink-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-natural max-w-lg w-full p-6 shadow-xl border border-appBorder space-y-4">
-            <div className="flex items-center justify-between border-b pb-3">
-              <h3 className="font-bold text-forest-900 text-sm flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-forest-700" />
-                <span>{isHindi ? 'सत्यापन अधिकारी समीक्षा (Reviewer Action)' : 'Reviewer Verification Action'}</span>
-              </h3>
-              <button 
-                onClick={() => setReviewerModalDoc(null)}
-                className="text-muted hover:text-ink-950"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="text-xs text-muted-dark space-y-1">
-              <div>
-                <span className="font-semibold text-ink-950">{isHindi ? 'दस्तावेज़:' : 'Document:'}</span>{' '}
-                {isHindi ? reviewerModalDoc.title_hi : reviewerModalDoc.title_en}
-              </div>
-              <div>
-                <span className="font-semibold text-ink-950">{isHindi ? 'मूल फ़ाइल:' : 'File:'}</span>{' '}
-                {reviewerModalDoc.file_name_original}
-              </div>
-            </div>
-
-            <div className="space-y-3 pt-2">
-              <label className="text-xs font-bold text-ink-950 block">
-                {isHindi ? 'समीक्षा निर्णय (Review Decision):' : 'Review Decision:'}
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setReviewerAction('APPROVE')}
-                  className={`p-2 rounded text-xs font-bold border text-center transition-all ${
-                    reviewerAction === 'APPROVE'
-                      ? 'bg-emerald-100 text-emerald-900 border-emerald-400 ring-2 ring-emerald-300'
-                      : 'bg-paper-50 text-muted-dark border-appBorder'
-                  }`}
-                >
-                  ✓ {isHindi ? 'स्वीकार (Approve)' : 'Approve'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setReviewerAction('REJECT')}
-                  className={`p-2 rounded text-xs font-bold border text-center transition-all ${
-                    reviewerAction === 'REJECT'
-                      ? 'bg-red-100 text-red-900 border-red-400 ring-2 ring-red-300'
-                      : 'bg-paper-50 text-muted-dark border-appBorder'
-                  }`}
-                >
-                  ✕ {isHindi ? 'अस्वीकार (Reject)' : 'Reject'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setReviewerAction('REQUEST_REUPLOAD')}
-                  className={`p-2 rounded text-xs font-bold border text-center transition-all ${
-                    reviewerAction === 'REQUEST_REUPLOAD'
-                      ? 'bg-amber-100 text-amber-900 border-amber-400 ring-2 ring-amber-300'
-                      : 'bg-paper-50 text-muted-dark border-appBorder'
-                  }`}
-                >
-                  ↻ {isHindi ? 'पुनः अपलोड' : 'Re-upload'}
-                </button>
-              </div>
-
-              {reviewerAction !== 'APPROVE' && (
-                <div className="space-y-1.5 pt-1">
-                  <label className="text-xs font-bold text-red-900 block">
-                    {isHindi ? 'अस्वीकृति का आधिकारिक कारण चुनें:' : 'Select Rejection Reason:'}
-                  </label>
-                  <select
-                    value={selectedReason}
-                    onChange={e => setSelectedReason(e.target.value)}
-                    className="w-full text-xs p-2 rounded border border-appBorder bg-white text-ink-950"
-                  >
-                    {REJECTION_REASONS.map(r => (
-                      <option key={r} value={r}>{r}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <div className="space-y-1 pt-1">
-                <label className="text-xs font-medium text-ink-950 block">
-                  {isHindi ? 'समीक्षा टिप्पणी (वैकल्पिक):' : 'Reviewer Remarks (Optional):'}
-                </label>
-                <input
-                  type="text"
-                  value={reviewerRemarks}
-                  onChange={e => setReviewerRemarks(e.target.value)}
-                  placeholder={isHindi ? 'उदाहरण: राजस्व मुहर सत्यापित' : 'e.g., Revenue seal verified'}
-                  className="w-full text-xs p-2 rounded border border-appBorder bg-white text-ink-950"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-2 pt-4 border-t">
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setReviewerModalDoc(null)}
-              >
-                {isHindi ? 'रद्द करें' : 'Cancel'}
-              </Button>
-              <Button
-                variant="primary"
-                size="sm"
-                isLoading={isReviewing}
-                onClick={handleReviewerSubmit}
-              >
-                {isHindi ? 'समीक्षा सहेजें' : 'Save Review'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
