@@ -1,12 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Send, Bot, ShieldCheck, X, Sparkles, Globe } from 'lucide-react';
+import { Send, Bot, ShieldCheck, X, Sparkles, Globe, AlertTriangle, ArrowRight } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { api } from '../../services/api';
+import type { ConversationalIntakeResponse, FarmerProfileInput } from '../../services/api';
 
 interface GroundedAssistantModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onStartWithProfile?: (profile: FarmerProfileInput, needs: string[]) => void;
 }
 
 type SupportedLanguage = 'hi' | 'en' | 'hinglish' | 'pa';
@@ -34,19 +36,19 @@ const WELCOME_MESSAGES: Record<SupportedLanguage, string> = {
 
 const SUGGESTED_QUERIES: Record<SupportedLanguage, string[]> = {
   hi: [
+    'मेरे पास दो बीघा जमीन है, गेहूं उगाता हूं, सिंचाई चाहिए',
     'पीएम-किसान में ₹6000 की किस्त कब मिलती है?',
     'फसल नुकसान होने पर 72 घंटे में बीमा दावा कैसे करें?',
     'केसीसी लोन पर 4% ब्याज के क्या नियम हैं?',
     'ड्रिप सिंचाई पर 55% सब्सिडी के लिए क्या कागज़ चाहिए?',
-    'दुर्घटना कल्याण योजना में ₹5 लाख की सहायता कैसे मिलती है?',
-    'क्या पीएम-किसान और केसीसी दोनों एक साथ ले सकते हैं?'
+    'दुर्घटना कल्याण योजना में ₹5 लाख की सहायता कैसे मिलती है?'
   ],
   en: [
+    'I have 2 bigha land and grow wheat, need irrigation help',
     'What are the eligibility rules for PM-KISAN?',
     'How to intimate crop damage within 72 hrs under PMFBY?',
     'What is the interest rate and limit for KCC in UP?',
     'What subsidy is available for drip irrigation?',
-    'How does UP Krishak Durghatna relief of Rs. 5 Lakh work?',
     'Can I combine PM-KISAN, KCC, and crop insurance?'
   ],
   hinglish: [
@@ -74,7 +76,7 @@ const PLACEHOLDERS: Record<SupportedLanguage, string> = {
   pa: 'ਜਿਵੇਂ ਕਿ: ਪੀ.ਐਮ-ਕਿਸਾਨ ਲਈ ਯੋਗਤਾ ਨਿਯਮ ਕੀ ਹਨ?'
 };
 
-export const GroundedAssistantModal: React.FC<GroundedAssistantModalProps> = ({ isOpen, onClose }) => {
+export const GroundedAssistantModal: React.FC<GroundedAssistantModalProps> = ({ isOpen, onClose, onStartWithProfile }) => {
   const { i18n } = useTranslation();
   const defaultLang: SupportedLanguage = (i18n.resolvedLanguage || i18n.language || 'hi').startsWith('hi') ? 'hi' : 'en';
 
@@ -92,6 +94,7 @@ export const GroundedAssistantModal: React.FC<GroundedAssistantModalProps> = ({ 
     verifiedAt?: string;
     canVerify?: boolean;
     language?: SupportedLanguage;
+    intakeResponse?: ConversationalIntakeResponse;
   }>>([
     {
       sender: 'assistant',
@@ -132,21 +135,36 @@ export const GroundedAssistantModal: React.FC<GroundedAssistantModalProps> = ({ 
     setMessages(prev => [...prev, { sender: 'user', text: textToQuery }]);
     setIsLoading(true);
 
+    const isIntake = /बीघा|bigha|एकड़|acre|हेक्टेयर|hectare|खेती|जमीन|सिंचाई|loan|कर्ज|केसीसी|फसल|kheti|jamin|crops/i.test(textToQuery);
+
     try {
-      const res = await api.queryAssistant(textToQuery, undefined, selectedLanguage);
-      setMessages(prev => [
-        ...prev,
-        {
-          sender: 'assistant',
-          text: res.answer,
-          sourceTitle: res.source_title,
-          authority: res.authority,
-          section: res.section,
-          verifiedAt: res.verified_at,
-          canVerify: res.can_verify,
-          language: selectedLanguage
-        }
-      ]);
+      if (isIntake) {
+        const res = await api.naturalLanguageIntake(textToQuery, selectedLanguage);
+        setMessages(prev => [
+          ...prev,
+          {
+            sender: 'assistant',
+            text: res.summary_message,
+            language: selectedLanguage,
+            intakeResponse: res
+          }
+        ]);
+      } else {
+        const res = await api.queryAssistant(textToQuery, undefined, selectedLanguage);
+        setMessages(prev => [
+          ...prev,
+          {
+            sender: 'assistant',
+            text: res.answer,
+            sourceTitle: res.source_title,
+            authority: res.authority,
+            section: res.section,
+            verifiedAt: res.verified_at,
+            canVerify: res.can_verify,
+            language: selectedLanguage
+          }
+        ]);
+      }
     } catch (err) {
       setMessages(prev => [
         ...prev,
@@ -251,6 +269,60 @@ export const GroundedAssistantModal: React.FC<GroundedAssistantModalProps> = ({ 
                 }`}
               >
                 <div className="whitespace-pre-line font-sans">{msg.text}</div>
+
+                {/* Regional Bigha Ambiguity Notice Banner */}
+                {msg.intakeResponse && msg.intakeResponse.ambiguities.length > 0 && (
+                  <div className="mt-2.5 p-2.5 rounded-subtle bg-amber-50/90 border border-amber-200/80 text-[11px] text-amber-950">
+                    <div className="flex items-center gap-1.5 font-semibold text-amber-900 mb-1">
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-600" />
+                      <span>{selectedLanguage === 'hi' ? 'क्षेत्रीय इकाई स्पष्टीकरण (Regional Unit Notice)' : 'Regional Unit Ambiguity Notice'}</span>
+                    </div>
+                    <div className="whitespace-pre-line text-ink-950/85">
+                      {selectedLanguage === 'hi'
+                        ? msg.intakeResponse.ambiguities[0].clarification_prompt_hi
+                        : msg.intakeResponse.ambiguities[0].clarification_prompt_en}
+                    </div>
+                  </div>
+                )}
+
+                {/* Follow-up question guidance */}
+                {msg.intakeResponse && msg.intakeResponse.follow_up_questions_hi.length > 0 && !msg.intakeResponse.can_proceed_to_evaluation && (
+                  <div className="mt-2 text-[11px] text-forest-900 space-y-1">
+                    <div className="font-semibold text-forest-800">
+                      {selectedLanguage === 'hi' ? 'अनुवर्ती प्रश्न (कृपया उत्तर दें):' : 'Follow-up questions:'}
+                    </div>
+                    {(selectedLanguage === 'hi' ? msg.intakeResponse.follow_up_questions_hi : msg.intakeResponse.follow_up_questions_en).map((q, qIdx) => (
+                      <div key={qIdx} className="p-1.5 rounded bg-forest-50/70 border border-forest-200/60 text-forest-950">
+                        {q}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Direct one-click eligibility evaluation trigger */}
+                {msg.intakeResponse && msg.intakeResponse.structured_profile_candidate && onStartWithProfile && (
+                  <div className="mt-3 pt-2.5 border-t border-ink-950/10">
+                    <Button
+                      type="button"
+                      variant="primary"
+                      size="sm"
+                      onClick={() => {
+                        if (msg.intakeResponse?.structured_profile_candidate) {
+                          onStartWithProfile(
+                            msg.intakeResponse.structured_profile_candidate,
+                            msg.intakeResponse.extracted_parameters.stated_needs
+                          );
+                        }
+                      }}
+                      rightIcon={<ArrowRight className="w-3.5 h-3.5" />}
+                      className="w-full justify-center shadow-xs"
+                    >
+                      {selectedLanguage === 'hi'
+                        ? 'इस जानकारी से पात्रता जाँचें (Evaluate Schemes Now)'
+                        : 'Evaluate Schemes for this Profile'}
+                    </Button>
+                  </div>
+                )}
 
                 {/* Evidence Footer for Assistant Responses */}
                 {msg.sourceTitle && (

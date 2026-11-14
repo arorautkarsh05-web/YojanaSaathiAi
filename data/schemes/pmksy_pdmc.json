@@ -1,0 +1,82 @@
+{
+  "scheme_code": "PMKSY_PDMC",
+  "official_name_en": "PM Krishi Sinchayee Yojana — Per Drop More Crop (Micro-Irrigation)",
+  "official_name_hi": "पीएम कृषि सिंचाई योजना — प्रति बूँद अधिक फसल (ड्रिप/स्प्रिंकलर अनुदान)",
+  "department": "Department of Horticulture & Food Processing, Govt of Uttar Pradesh",
+  "level": "CENTRAL",
+  "benefit_type": "SUBSIDY",
+  "benefit_summary_en": "Up to 55% capital subsidy for small and marginal farmers (45% for other farmers) for installing water-saving Drip and Sprinkler irrigation systems.",
+  "benefit_summary_hi": "लघु एवं सीमांत किसानों को 55% तक तथा अन्य किसानों को 45% तक ड्रिप व स्प्रिंकलर सिंचाई संयंत्र स्थापना पर सरकारी अनुदान।",
+  "official_portal_url": "https://uphorticulture.gov.in",
+  "source_title": "PMKSY-PDMC Operational Guidelines & UP Govt Order No. 112/Hort/2023",
+  "source_section": "Clause 4 (Pattern of Assistance) and Clause 5 (Eligibility Criteria)",
+  "source_url": "https://pmksy.gov.in",
+  "verified_at": "2026-01-20T10:00:00Z",
+  "verified_by": "UP Horticulture Directorate, Lucknow",
+  "rules": [
+    {
+      "rule_code": "RULE_PMKSY_WATER_SOURCE",
+      "title_en": "Availability of Assured Irrigation Water Source",
+      "title_hi": "सुनिश्चित जल स्रोत (नलकूप, बोरवेल अथवा नहर कनेक्शन)",
+      "field_name": "irrigation_source",
+      "operator": "IN",
+      "target_value": [
+        "tubeWell",
+        "canal"
+      ],
+      "is_mandatory": true,
+      "citation": "PMKSY Guidelines Clause 5.2: Farmer must possess an assured irrigation water source."
+    },
+    {
+      "rule_code": "RULE_PMKSY_LAND",
+      "title_en": "Minimum Cultivable Land for Micro-Irrigation",
+      "title_hi": "माइक्रो-इरीगेशन हेतु न्यूनतम कृषि रकबा (0.2 एकड़)",
+      "field_name": "landholding_acres",
+      "operator": "GTE",
+      "target_value": 0.2,
+      "is_mandatory": true,
+      "citation": "PMKSY Guidelines Clause 5.1: Minimum area for drip system installation."
+    }
+  ],
+  "need_tags": [
+    "irrigation",
+    "micro_irrigation",
+    "drip_irrigation",
+    "sprinkler",
+    "water_saving",
+    "sinchayee",
+    "boring"
+  ],
+  "category": "IRRIGATION_EQUIPMENT",
+  "documents": [
+    {
+      "id": "doc_khatauni",
+      "title_en": "Updated Khatauni (within 6 months)",
+      "title_hi": "नवीनतम खतौनी नकल (6 माह के भीतर)",
+      "source": "UP Bhulekh"
+    },
+    {
+      "id": "doc_electricity_bill",
+      "title_en": "Electricity Bill or Water Source Certificate",
+      "title_hi": "नलकूप बिजली बिल अथवा जल स्रोत प्रमाण",
+      "source": "UPPCL / Gram Panchayat"
+    },
+    {
+      "id": "doc_soil_test",
+      "title_en": "Soil and Water Quality Test Card (Optional)",
+      "title_hi": "मृदा एवं जल परीक्षण कार्ड",
+      "source": "UP Krishi Vigyan Kendra"
+    }
+  ],
+  "official_steps": [
+    {
+      "step_number": 1,
+      "title_en": "Online Token Booking on UP Horticulture Portal",
+      "title_hi": "यूपी औद्यानिक पोर्टल पर ऑनलाइन टोकन बुकिंग",
+      "description_en": "Book subsidy token online at uphorticulture.gov.in with farmer registration number.",
+      "description_hi": "uphorticulture.gov.in पर जाकर किसान पंजीकरण संख्या से अनुदान टोकन बुक करें।",
+      "portal_or_destination": "https://uphorticulture.gov.in",
+      "is_independent": true
+    }
+  ]
+}

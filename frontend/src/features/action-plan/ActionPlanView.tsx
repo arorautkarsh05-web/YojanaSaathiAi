@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
-  Printer, ArrowLeft, CheckCircle2, Circle, MapPin
+  Printer, ArrowLeft, CheckCircle2, Circle, MapPin, Compass, ShieldAlert, WifiOff
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { StatusBadge } from '../../components/ui/StatusBadge';
@@ -17,6 +17,26 @@ export const ActionPlanView: React.FC<ActionPlanViewProps> = ({ planData, onBack
   const isHindi = (i18n.resolvedLanguage || i18n.language || 'hi').startsWith('hi');
 
   const [checklist, setChecklist] = useState(planData.checklist_items);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  // Rural low-bandwidth resilience: cache plan in localStorage
+  useEffect(() => {
+    try {
+      localStorage.setItem(`yojanasaathi_plan_${planData.plan_number}`, JSON.stringify(planData));
+      localStorage.setItem('yojanasaathi_latest_plan_number', planData.plan_number);
+    } catch {
+      // ignore quota error
+    }
+
+    const handleOnline = () => setIsOffline(false);
+    const handleOffline = () => setIsOffline(true);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [planData]);
 
   const toggleDoc = (id: string) => {
     setChecklist(prev =>
@@ -29,6 +49,7 @@ export const ActionPlanView: React.FC<ActionPlanViewProps> = ({ planData, onBack
   };
 
   const readyCount = checklist.filter(c => c.is_ready).length;
+  const isDocsComplete = readyCount === checklist.length && checklist.length > 0;
 
   return (
     <div className="max-w-4xl mx-auto py-8 px-4 print:p-0">
@@ -43,6 +64,13 @@ export const ActionPlanView: React.FC<ActionPlanViewProps> = ({ planData, onBack
           </Button>
         </div>
       </div>
+
+      {isOffline && (
+        <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-natural flex items-center gap-2 text-xs text-amber-900 no-print">
+          <WifiOff className="w-4 h-4 text-amber-600 shrink-0" />
+          <span>{isHindi ? 'ऑफ़लाइन मोड सक्रिय: यह कार्य योजना आपके ब्राउज़र में सुरक्षित है और बिना इंटरनेट के उपलब्ध रहेगी।' : 'Offline Mode Active: This action plan is cached locally and available without internet.'}</span>
+        </div>
+      )}
 
       {/* Printable Document Container */}
       <div className="bg-white/80 backdrop-blur-xl border border-white/60 rounded-panel p-6 sm:p-10 shadow-[0_12px_40px_rgba(23,37,31,0.08)] print:bg-white print:border-none print:shadow-none print-page">
@@ -70,6 +98,59 @@ export const ActionPlanView: React.FC<ActionPlanViewProps> = ({ planData, onBack
           <p className="text-xs text-muted-dark mt-2 italic">
             {t('actionPlan.validityNotice')}
           </p>
+        </div>
+
+        {/* 7-Stage Farmer Benefit Journey Tracker */}
+        <div className="mb-8 p-4 rounded-natural bg-paper-100/80 border border-appBorder">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-xs font-bold uppercase tracking-wider text-forest-900 flex items-center gap-1.5">
+              <Compass className="w-4 h-4 text-forest-700" />
+              <span>{isHindi ? '7-चरणीय पारदर्शी किसान लाभ यात्रा (Farmer Benefit Journey)' : '7-Stage Transparent Farmer Benefit Journey'}</span>
+            </h2>
+            <span className="text-[11px] font-semibold text-leaf-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+              {isHindi ? 'चरण 4 सक्रिय' : 'Stage 4 Active'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2 text-center text-[10px]">
+            <div className="p-2 rounded bg-emerald-100/80 border border-emerald-300 text-emerald-950 font-medium">
+              <div className="text-xs font-bold text-emerald-900 mb-0.5">1. प्रोफाइल ✓</div>
+              <div>{isHindi ? 'सत्यापित विवरण' : 'Profile Done'}</div>
+            </div>
+            <div className="p-2 rounded bg-emerald-100/80 border border-emerald-300 text-emerald-950 font-medium">
+              <div className="text-xs font-bold text-emerald-900 mb-0.5">2. पात्रता जाँच ✓</div>
+              <div>{isHindi ? 'नियम मूल्यांकन' : 'Eligible Evaluated'}</div>
+            </div>
+            <div className="p-2 rounded bg-emerald-100/80 border border-emerald-300 text-emerald-950 font-medium">
+              <div className="text-xs font-bold text-emerald-900 mb-0.5">3. छूटी जानकारी ✓</div>
+              <div>{isHindi ? 'आवश्यकता पहचानी' : 'Gaps Resolved'}</div>
+            </div>
+            <div className={`p-2 rounded border font-medium ${isDocsComplete ? 'bg-emerald-100/80 border-emerald-300 text-emerald-950' : 'bg-field-100 border-forest-800 text-forest-950 shadow-2xs'}`}>
+              <div className="text-xs font-bold text-forest-900 mb-0.5">4. दस्तावेज़ {isDocsComplete ? '✓' : `(${readyCount}/${checklist.length})`}</div>
+              <div>{isHindi ? (isDocsComplete ? 'दस्तावेज़ पूर्ण' : 'तैयारी जारी') : 'Docs Prep'}</div>
+            </div>
+            <div className="p-2 rounded bg-paper-50 border border-appBorder text-ink-950/70">
+              <div className="text-xs font-bold text-ink-950/80 mb-0.5">5. आधिकारिक आवेदन</div>
+              <div>{isHindi ? 'पोर्टल मार्गदर्शन' : 'Official Portal'}</div>
+            </div>
+            <div className="p-2 rounded bg-paper-50 border border-appBorder text-ink-950/60">
+              <div className="text-xs font-bold text-ink-950/70 mb-0.5">6. किसान प्रगति</div>
+              <div>{isHindi ? 'स्वयं दर्ज स्थिति' : 'Farmer Reported'}</div>
+            </div>
+            <div className="p-2 rounded bg-paper-50 border border-appBorder text-ink-950/60">
+              <div className="text-xs font-bold text-ink-950/70 mb-0.5">7. लाभ संपुष्टि</div>
+              <div>{isHindi ? 'विभागीय सत्यापन' : 'Govt Verified'}</div>
+            </div>
+          </div>
+
+          <div className="mt-3 pt-2 border-t border-appBorder/80 flex items-start gap-1.5 text-[10px] text-muted-dark">
+            <ShieldAlert className="w-3.5 h-3.5 text-forest-700 shrink-0 mt-0.5" />
+            <span>
+              {isHindi
+                ? 'पारदर्शिता सूचना: चरण 1-5 योजना साथी द्वारा गजट नियमों से संचालित हैं। चरण 6-7 किसान द्वारा स्वयं दर्ज की जाने वाली प्रगति है। आधिकारिक स्वीकृति केवल सक्षम सरकारी विभाग द्वारा प्रदान की जाती है।'
+                : 'Transparency Notice: Stages 1-5 are guided by YojanaSaathi based on gazetted rules. Stages 6-7 represent farmer self-reported status. Official sanction is granted solely by the respective government authority.'}
+            </span>
+          </div>
         </div>
 
         {/* Section 1: Selected Schemes & Eligibility */}

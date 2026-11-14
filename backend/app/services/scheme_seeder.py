@@ -334,59 +334,12 @@ def seed_schemes_and_rules(db: Session) -> None:
 
             db.commit()
 
-    # Seed Pairwise Compatibility Rules
-    compatibility_data = [
-        {
-            "scheme_code_a": "PM_KISAN",
-            "scheme_code_b": "PMFBY",
-            "status": "COMPATIBLE_CONFIRMED",
-            "evidence_text": "PM-KISAN operational guidelines (Clause 3) and PMFBY operational guidelines (Clause 4.4) confirm that income support under PM-KISAN is independent of statutory crop loss insurance. Receiving PM-KISAN does not preclude or reduce PMFBY claim payout.",
-            "authoritative_source": "MoA&FW PMFBY/PMK Harmonization Office Memorandum 2021-Agri-09",
-            "source_section": "Clause 2.3",
-            "verified_by": "Senior Agricultural Policy Analyst"
-        },
-        {
-            "scheme_code_a": "PM_KISAN",
-            "scheme_code_b": "KCC",
-            "status": "COMPATIBLE_CONFIRMED",
-            "evidence_text": "The Ministry of Agriculture launched a dedicated national saturation campaign actively encouraging all active PM-KISAN beneficiaries to obtain Kisan Credit Cards without extra processing fee up to Rs. 1.6 Lakh limit.",
-            "authoritative_source": "Department of Financial Services / MoA&FW Joint Saturation Circular 2020",
-            "source_section": "Section 1 (KCC for PM-KISAN Beneficiaries)",
-            "verified_by": "Senior Banking & Credit Specialist"
-        },
-        {
-            "scheme_code_a": "PMFBY",
-            "scheme_code_b": "KCC",
-            "status": "COMPATIBLE_CONFIRMED",
-            "evidence_text": "Kisan Credit Card holders cultivating notified crops are automatically enrolled for PMFBY coverage through their loan account unless an explicit opt-out declaration is filed before the seasonal deadline.",
-            "authoritative_source": "RBI Master Circular FIDD.CO.FSD.BC.No.6/2022-23 Section 4.5",
-            "source_section": "Section 4.5",
-            "verified_by": "Senior Banking & Credit Specialist"
-        },
-        {
-            "scheme_code_a": "PMKSY_PDMC",
-            "scheme_code_b": "SMAM_MACHINERY",
-            "status": "COMPATIBLE_CONFIRMED",
-            "evidence_text": "Micro-irrigation systems under Horticulture Department and farm mechanization equipment under Agriculture Department apply to distinct physical capital assets. Both subsidies can be availed concurrently on the same farm without duplication penalty.",
-            "authoritative_source": "UP State Agriculture Convergence Advisory Committee Resolution 2023",
-            "source_section": "Item 4 (Subsidies on Distinct Capital Assets)",
-            "verified_by": "UP State Convergence Committee"
-        },
-        {
-            "scheme_code_a": "PM_KISAN",
-            "scheme_code_b": "UP_KRISHAK_DURGHATNA",
-            "status": "COMPATIBLE_CONFIRMED",
-            "evidence_text": "UP Mukhyamantri Krishak Durghatna Kalyan Yojana is a social security accident benefit for registered farmers and laborers, distinct from the central agricultural income support scheme. Both remain fully combinable.",
-            "authoritative_source": "UP Revenue Department Notification No. 1420/1-11-2020-04(01)/2020 Rule 6",
-            "source_section": "Rule 6",
-            "verified_by": "UP Revenue Dept Legal Cell"
-        }
-    ]
-
-    for comp in compatibility_data:
+    # Seed Pairwise Compatibility Rules from authoritative register
+    from app.services.scheme_catalogue import CONVERGENCE_REGISTER
+    for comp in CONVERGENCE_REGISTER:
         existing = db.query(CompatibilityRule).filter(
-            CompatibilityRule.scheme_code_a == comp["scheme_code_a"],
-            CompatibilityRule.scheme_code_b == comp["scheme_code_b"]
+            ((CompatibilityRule.scheme_code_a == comp["scheme_code_a"]) & (CompatibilityRule.scheme_code_b == comp["scheme_code_b"])) |
+            ((CompatibilityRule.scheme_code_a == comp["scheme_code_b"]) & (CompatibilityRule.scheme_code_b == comp["scheme_code_a"]))
         ).first()
         if not existing:
             rule = CompatibilityRule(
@@ -400,5 +353,5 @@ def seed_schemes_and_rules(db: Session) -> None:
                 verified_at=datetime.now(timezone.utc)
             )
             db.add(rule)
-            db.commit()
+    db.commit()
 

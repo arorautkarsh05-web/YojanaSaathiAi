@@ -5,6 +5,7 @@ The LLM does NOT make eligibility decisions; this engine is strictly determinist
 """
 
 from typing import Dict, Any, List, Tuple, Optional
+from datetime import datetime, timezone
 from app.services.scheme_catalogue import SCHEME_CATALOGUE
 from app.services.geo_applicability import evaluate_geographic_applicability, normalize_district_name
 from app.schemas import RuleOutcome, SchemeEvaluation
@@ -338,8 +339,21 @@ def evaluate_scheme(scheme_code: str, profile_data: Dict[str, Any]) -> SchemeEva
         overall_status = "LIKELY_ELIGIBLE"
         readiness_state = "READY_FOR_OFFICIAL_APPLICATION_REVIEW"
 
+    # Derive missing information fields
+    missing_fields = []
+    for r in unknown_rules:
+        for rule_def in scheme.get("rules", []):
+            if rule_def.get("rule_code") == r.rule_code:
+                fn = rule_def.get("field_name")
+                if fn and fn not in missing_fields:
+                    missing_fields.append(fn)
+
+    all_conditions = passed_rules + failed_rules + unknown_rules
+    evidence_refs = [scheme.get("source_url", "")] if scheme.get("source_url") else []
+
     return SchemeEvaluation(
         scheme_code=scheme["scheme_code"],
+        scheme_id=scheme["scheme_code"],
         official_name_en=scheme["official_name_en"],
         official_name_hi=scheme["official_name_hi"],
         department=scheme["department"],
@@ -349,9 +363,18 @@ def evaluate_scheme(scheme_code: str, profile_data: Dict[str, Any]) -> SchemeEva
         benefit_summary_en=scheme["benefit_summary_en"],
         benefit_summary_hi=scheme["benefit_summary_hi"],
         overall_status=overall_status,
+        conditions=all_conditions,
         passed_rules=passed_rules,
+        passed_conditions=passed_rules,
         failed_rules=failed_rules,
+        failed_conditions=failed_rules,
         unknown_rules=unknown_rules,
+        unknown_conditions=unknown_rules,
+        missing_information=missing_fields,
+        policy_version=scheme.get("version", "2024.1"),
+        evidence_references=evidence_refs,
+        assessment_timestamp=datetime.now(timezone.utc).isoformat(),
+        disclaimer="यह मूल्यांकन केवल आधिकारिक नियमों के आधार पर प्रारंभिक मार्गदर्शन है। अंतिम पात्रता और लाभ का निर्णय संबंधित सरकारी विभाग द्वारा सत्यापन के बाद ही किया जाएगा।",
         official_portal_url=scheme["official_portal_url"],
         verified_at=scheme["verified_at"],
         source_title=scheme["source_title"],

@@ -1,0 +1,69 @@
+{
+  "scheme_code": "KCC",
+  "official_name_en": "Kisan Credit Card (KCC) Institutional Agriculture Credit",
+  "official_name_hi": "किसान क्रेडिट कार्ड (केसीसी) रियायती कृषि ऋण",
+  "department": "Department of Agriculture & Farmers Welfare / RBI / NABARD",
+  "level": "CENTRAL",
+  "benefit_type": "CREDIT",
+  "benefit_summary_en": "Short-term production credit up to Rs. 3 Lakh at subsidized 4% effective interest rate (with 3% prompt repayment incentive) for seeds, fertilizer, and crop cultivation.",
+  "benefit_summary_hi": "बीज, खाद और फसल खर्च हेतु ₹3 लाख तक का सस्ता कृषि ऋण, समय पर भुगतान पर मात्र 4% प्रभावी ब्याज दर पर।",
+  "official_portal_url": "https://www.myscheme.gov.in/schemes/kcc",
+  "source_title": "Reserve Bank of India Master Circular on KCC Scheme (FIDD.CO.FSD.BC.No.6/2022-23)",
+  "source_section": "Section 2 (Eligibility) and Section 3 (Credit Limit Determination)",
+  "source_url": "https://www.rbi.org.in/Scripts/BS_ViewMasCirculardetails.aspx?id=12304",
+  "verified_at": "2026-01-20T10:00:00Z",
+  "verified_by": "State Level Bankers Committee (SLBC) Uttar Pradesh",
+  "rules": [
+    {
+      "rule_code": "RULE_KCC_LAND_CULTIVATION",
+      "title_en": "Owner-Cultivator or Verified Tenant Status",
+      "title_hi": "स्वयं की भूमि पर काश्तकार अथवा सत्यापित बटाईदार किसान",
+      "field_name": "landholding_acres",
+      "operator": "GTE",
+      "target_value": 0.1,
+      "is_mandatory": true,
+      "citation": "RBI KCC Circular Sec 2: All farmers - individuals/joint borrowers who are owner cultivators."
+    }
+  ],
+  "need_tags": [
+    "credit",
+    "loan",
+    "kisan_credit_card",
+    "working_capital",
+    "low_interest_loan",
+    "kcc",
+    "crop_loan"
+  ],
+  "category": "AGRICULTURAL_CREDIT",
+  "documents": [
+    {
+      "id": "doc_khatauni",
+      "title_en": "Revenue Land Record (Khatauni) with Land Valuation",
+      "title_hi": "तहसीलदार द्वारा प्रमाणित खतौनी नकल",
+      "source": "UP Tehsil"
+    },
+    {
+      "id": "doc_crop_declaration",
+      "title_en": "Cropping Pattern Declaration Form",
+      "title_hi": "फसल चक्र एवं रकबा घोषणा पत्र",
+      "source": "Bank Branch"
+    },
+    {
+      "id": "doc_no_dues",
+      "title_en": "No Dues Certificate (if borrowing > Rs. 1.6 Lakh without tie-up)",
+      "title_hi": "अदेयता प्रमाण पत्र (No Dues Certificate)",
+      "source": "Local Bank Branches"
+    }
+  ],
+  "official_steps": [
+    {
+      "step_number": 1,
+      "title_en": "Submit 1-Page KCC Application to Grameen / Commercial Bank",
+      "title_hi": "नजदीकी ग्रामीण या व्यावसायिक बैंक शाखा में 1-पेज का केसीसी फॉर्म जमा करें",
+      "description_en": "Fill simplified 1-page form along with land record and Aadhaar copy.",
+      "description_hi": "खतौनी की प्रति और आधार के साथ शाखा में सरलीकृत केसीसी आवेदन पत्र प्रस्तुत करें।",
+      "portal_or_destination": "Local Bank Branch / CSC",
+      "is_independent": true
+    }
+  ]
+}

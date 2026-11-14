@@ -37,3 +37,9 @@ yarn-error.log*
 *.swo
 .DS_Store
 Thumbs.db
+
+# Archives & Temporary Tool Caches
+*.zip
+.agents/
+skills-lock.json
+

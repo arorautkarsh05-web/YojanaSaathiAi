@@ -1,0 +1,64 @@
+{
+  "scheme_code": "SMAM_MACHINERY",
+  "official_name_en": "Sub-Mission on Agricultural Mechanization (UP Krishi Yantrikikaran)",
+  "official_name_hi": "कृषि यंत्रीकरण उप-मिशन (उत्तर प्रदेश कृषि यंत्र अनुदान)",
+  "department": "Department of Agriculture, Govt of Uttar Pradesh",
+  "level": "CENTRAL",
+  "benefit_type": "SUBSIDY",
+  "benefit_summary_en": "40% to 50% capital subsidy on modern farm machinery including Rotavators, Happy Seeders, Laser Land Levelers, Power Tillers, and Custom Hiring Centers.",
+  "benefit_summary_hi": "रोटावेटर, हैप्पी सीडर, लेजर लैंड लेवलर और पावर टिलर जैसे आधुनिक कृषि यंत्रों पर 40% से 50% तक सीधा सरकारी अनुदान।",
+  "official_portal_url": "https://agriculture.up.gov.in",
+  "source_title": "SMAM Operational Guidelines Chapter III & UP DBT Agriculture Circular 2024",
+  "source_section": "Chapter III (Subsidy Norms for Individual Farmers & Farm Machinery Banks)",
+  "source_url": "https://agrimachinery.nic.in",
+  "verified_at": "2026-01-20T10:00:00Z",
+  "verified_by": "Directorate of Agriculture, Krishi Bhawan, Lucknow",
+  "rules": [
+    {
+      "rule_code": "RULE_SMAM_LAND",
+      "title_en": "Minimum Cultivable Holding for Individual Equipment",
+      "title_hi": "व्यक्तिगत कृषि यंत्र अनुदान हेतु न्यूनतम भूमि स्वामित्व (0.5 एकड़)",
+      "field_name": "landholding_acres",
+      "operator": "GTE",
+      "target_value": 0.5,
+      "is_mandatory": true,
+      "citation": "SMAM Guidelines Chapter III Clause 3.2: Minimum landholding requirement for heavy implements."
+    }
+  ],
+  "need_tags": [
+    "machinery",
+    "tractor",
+    "rotavator",
+    "farm_equipment",
+    "yantrikikaran",
+    "mechanization",
+    "implements",
+    "subsidy_machinery"
+  ],
+  "category": "FARM_MECHANIZATION",
+  "documents": [
+    {
+      "id": "doc_up_reg",
+      "title_en": "UP Agriculture Portal Farmer Registration Number",
+      "title_hi": "पारदर्शी किसान सेवा पोर्टल (agriculture.up.gov.in) पंजीकरण संख्या",
+      "source": "UP Agriculture Dept"
+    },
+    {
+      "id": "doc_khatauni",
+      "title_en": "Verified Khatauni Record",
+      "title_hi": "सत्यापित खतौनी नकल",
+      "source": "UP Revenue Dept"
+    }
+  ],
+  "official_steps": [
+    {
+      "step_number": 1,
+      "title_en": "Online Token Booking on agriculture.up.gov.in (Lottery / First-Come)",
+      "title_hi": "agriculture.up.gov.in पर यंत्र टोकन बुकिंग व जमानत धनराशि जमा",
+      "description_en": "Book token during open notification window on agriculture.up.gov.in and deposit token fee.",
+      "description_hi": "विभागीय विज्ञप्ति के समय agriculture.up.gov.in पर टोकन जनरेट कर अधिकृत डीलर से यंत्र क्रय करें।",
+      "portal_or_destination": "https://agriculture.up.gov.in",
+      "is_independent": true
+    }
+  ]
+}

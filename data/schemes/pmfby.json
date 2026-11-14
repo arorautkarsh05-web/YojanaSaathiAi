@@ -1,0 +1,85 @@
+{
+  "scheme_code": "PMFBY",
+  "official_name_en": "Pradhan Mantri Fasal Bima Yojana (UP)",
+  "official_name_hi": "प्रधानमंत्री फसल बीमा योजना (उत्तर प्रदेश)",
+  "department": "Department of Agriculture, Govt of Uttar Pradesh / MoA&FW",
+  "level": "CENTRAL",
+  "benefit_type": "INSURANCE",
+  "benefit_summary_en": "Comprehensive risk insurance for crop loss due to non-preventable natural calamities (drought, flood, unseasonal rain, pests, hailstorm) with nominal farmer premium (1.5% Rabi, 2% Kharif).",
+  "benefit_summary_hi": "प्राकृतिक आपदाओं (सूखा, बाढ़, ओलावृष्टि, कीट प्रकोप) से फसल बर्बादी पर पूर्ण बीमा सुरक्षा। किसान प्रीमियम केवल 1.5% (रबी) व 2% (खरीफ)।",
+  "official_portal_url": "https://pmfby.gov.in",
+  "source_title": "PMFBY Revised Operational Guidelines 2023 & UP Agriculture Notification",
+  "source_section": "Section 4.1 (Notified Crops & Season Cutoff Dates) and Section 6 (Coverage)",
+  "source_url": "https://pmfby.gov.in/pdf/Revised_Operational_Guidelines.pdf",
+  "verified_at": "2026-01-20T10:00:00Z",
+  "verified_by": "UP Agriculture & Insurance State Nodal Officer",
+  "rules": [
+    {
+      "rule_code": "RULE_PMFBY_NOTIFIED_CROP",
+      "title_en": "Cultivation of Notified Seasonal Crops",
+      "title_hi": "अधिसूचित मौसमी फसलों की खेती (गेहूँ, धान, दलहन, तिलहन, गन्ना)",
+      "field_name": "primary_crops",
+      "operator": "INTERSECT_ANY",
+      "target_value": [
+        "wheat",
+        "paddy",
+        "sugarcane",
+        "pulses",
+        "oilseeds",
+        "vegetables"
+      ],
+      "is_mandatory": true,
+      "citation": "PMFBY Guidelines Sec 4: Scheme covers major food and oilseed crops notified per cluster."
+    },
+    {
+      "rule_code": "RULE_PMFBY_INSURABLE_INTEREST",
+      "title_en": "Insurable Interest in Notified Farm Area",
+      "title_hi": "कृषि भूमि पर कानूनी काश्तकारी अधिकार",
+      "field_name": "landholding_acres",
+      "operator": "GTE",
+      "target_value": 0.05,
+      "is_mandatory": true,
+      "citation": "PMFBY Guidelines Sec 3: Farmer must have insurable interest as owner or tenant."
+    }
+  ],
+  "need_tags": [
+    "crop_insurance",
+    "loss_compensation",
+    "flood_relief",
+    "drought_insurance",
+    "fasal_bima",
+    "crop_damage"
+  ],
+  "category": "CROP_INSURANCE",
+  "documents": [
+    {
+      "id": "doc_sowing_cert",
+      "title_en": "Sowing Certificate / Declaration (Buvai Praman Patra)",
+      "title_hi": "फसल बुवाई स्व-प्रमाण पत्र / लेखपाल प्रमाण",
+      "source": "UP Agriculture Gram Sevak"
+    },
+    {
+      "id": "doc_khatauni",
+      "title_en": "Land Record (Khatauni) / Tenant Agreement",
+      "title_hi": "खतौनी नकल अथवा काश्तकारी अनुबंध पत्र",
+      "source": "UP Revenue Dept"
+    },
+    {
+      "id": "doc_bank_passbook",
+      "title_en": "Bank Passbook with active IFSC",
+      "title_hi": "बैंक खाता पासबुक",
+      "source": "Commercial / Grameen Bank"
+    }
+  ],
+  "official_steps": [
+    {
+      "step_number": 1,
+      "title_en": "Enrolment through Bank or CSC (Before Cutoff Date)",
+      "title_hi": "कट-ऑफ तिथि से पूर्व बैंक शाखा अथवा सीएससी (CSC) द्वारा आवेदन",
+      "description_en": "Non-loanee farmers apply via pmfby.gov.in or CSC before seasonal cutoff (31 July Kharif / 31 Dec Rabi).",
+      "description_hi": "गैर-ऋणी किसान pmfby.gov.in या नजदीकी CSC पर बुवाई प्रमाण पत्र के साथ प्रीमियम जमा करें।",
+      "portal_or_destination": "https://pmfby.gov.in",
+      "is_independent": true
+    }
+  ]
+}

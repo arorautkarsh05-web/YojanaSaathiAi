@@ -1,0 +1,72 @@
+{
+  "scheme_code": "UP_KRISHAK_DURGHATNA",
+  "official_name_en": "UP Mukhyamantri Krishak Durghatna Kalyan Yojana",
+  "official_name_hi": "यूपी मुख्यमंत्री कृषक दुर्घटना कल्याण योजना",
+  "department": "Revenue Department, Govt of Uttar Pradesh",
+  "level": "STATE_UP",
+  "category": "ACCIDENT_WELFARE_COMPENSATION",
+  "benefit_type": "DIRECT_BENEFIT_TRANSFER",
+  "benefit_summary_en": "Social security compensation up to Rs. 5 Lakh to the farmer or dependent family members in case of accidental death or permanent handicap while farming.",
+  "benefit_summary_hi": "खेती या कृषि कार्य के दौरान दुर्घटना में मृत्यु या स्थायी दिव्यांगता पर किसान अथवा आश्रित परिवार को ₹5 लाख तक की आर्थिक सहायता (यह पेंशन नहीं बल्कि दुर्घटना राहत अनुदान है)।",
+  "official_portal_url": "https://edistrict.up.gov.in",
+  "source_title": "UP Revenue Dept Notification No. 1420/1-11-2020-04(01)/2020",
+  "source_section": "Rule 3 (Eligible Beneficiaries & Age Group 18-70) and Rule 4 (Grant Amount)",
+  "source_url": "https://bor.up.gov.in",
+  "verified_at": "2026-01-20T10:00:00Z",
+  "verified_by": "UP Board of Revenue, Lucknow",
+  "rules": [
+    {
+      "rule_code": "RULE_UP_DURGHATNA_DOMICILE",
+      "title_en": "Uttar Pradesh Permanent Resident",
+      "title_hi": "उत्तर प्रदेश का मूल निवासी",
+      "field_name": "state",
+      "operator": "EQUALS",
+      "target_value": "Uttar Pradesh",
+      "is_mandatory": true,
+      "citation": "UP Revenue Dept Notification Rule 3: Resident farmer of Uttar Pradesh."
+    },
+    {
+      "rule_code": "RULE_UP_DURGHATNA_KHATAUNI",
+      "title_en": "Registered Farmer or Landless Agricultural Worker",
+      "title_hi": "खतौनी में दर्ज किसान अथवा ग्राम पंचायत सत्यापित भूमिहीन खेतिहर मजदूर",
+      "field_name": "landholding_acres",
+      "operator": "GTE",
+      "target_value": 0.0,
+      "is_mandatory": true,
+      "citation": "UP Notification Rule 3.2: Khatauni record holders and certified landless agricultural laborers."
+    }
+  ],
+  "need_tags": [
+    "social_security",
+    "accident_relief",
+    "disability_compensation",
+    "durghatna_kalyan",
+    "welfare",
+    "accident_insurance"
+  ],
+  "documents": [
+    {
+      "id": "doc_domicile",
+      "title_en": "UP Domicile / Residence Proof",
+      "title_hi": "उत्तर प्रदेश निवास प्रमाण पत्र",
+      "source": "UP Edistrict"
+    },
+    {
+      "id": "doc_khatauni",
+      "title_en": "Khatauni / Gram Pradhan Agricultural Labor Certificate",
+      "title_hi": "खतौनी नकल अथवा कृषि मजदूर प्रमाण पत्र",
+      "source": "UP Revenue / Gram Panchayat"
+    }
+  ],
+  "official_steps": [
+    {
+      "step_number": 1,
+      "title_en": "Application submission to Sub-Divisional Magistrate (SDM) / Tehsil",
+      "title_hi": "उपजिलाधिकारी (एसडीएम) / तहसील कार्यालय में आवेदन",
+      "description_en": "Submit claim within 45 days of occurrence at Tehsil or online via e-District UP.",
+      "description_hi": "दुर्घटना के 45 दिनों के भीतर तहसील अथवा e-District UP पोर्टल के माध्यम से दावा प्रस्तुत करें।",
+      "portal_or_destination": "https://edistrict.up.gov.in",
+      "is_independent": true
+    }
+  ]
+}

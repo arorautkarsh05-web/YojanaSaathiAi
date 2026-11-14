@@ -61,6 +61,7 @@ class RuleOutcome(BaseModel):
 
 class SchemeEvaluation(BaseModel):
     scheme_code: str
+    scheme_id: Optional[str] = None
     official_name_en: str
     official_name_hi: str
     department: str
@@ -70,9 +71,18 @@ class SchemeEvaluation(BaseModel):
     benefit_summary_en: str
     benefit_summary_hi: str
     overall_status: str # LIKELY_ELIGIBLE, NEEDS_MORE_INFO, LIKELY_NOT_ELIGIBLE
-    passed_rules: List[RuleOutcome]
-    failed_rules: List[RuleOutcome]
-    unknown_rules: List[RuleOutcome]
+    conditions: Optional[List[RuleOutcome]] = []
+    passed_rules: List[RuleOutcome] = []
+    passed_conditions: Optional[List[RuleOutcome]] = []
+    failed_rules: List[RuleOutcome] = []
+    failed_conditions: Optional[List[RuleOutcome]] = []
+    unknown_rules: List[RuleOutcome] = []
+    unknown_conditions: Optional[List[RuleOutcome]] = []
+    missing_information: Optional[List[str]] = []
+    policy_version: Optional[str] = "2024.1"
+    evidence_references: Optional[List[str]] = []
+    assessment_timestamp: Optional[str] = None
+    disclaimer: Optional[str] = "यह मूल्यांकन केवल आधिकारिक नियमों के आधार पर प्रारंभिक मार्गदर्शन है। अंतिम पात्रता और लाभ का निर्णय संबंधित सरकारी विभाग द्वारा सत्यापन के बाद ही किया जाएगा।"
     official_portal_url: str
     verified_at: str
     source_title: str
@@ -194,4 +204,38 @@ class AssistantQueryResponse(BaseModel):
     can_verify: bool
     detected_language: Optional[str] = "hi"
     related_schemes: Optional[List[str]] = []
+
+# --- Conversational Intake & Extraction Schemas ---
+class ConversationalIntakeRequest(BaseModel):
+    text: str
+    preferred_language: Optional[str] = "hi"
+    context: Optional[Dict[str, Any]] = {}
+
+class ExtractedProfileParameters(BaseModel):
+    district: Optional[str] = None
+    landholding_acres: Optional[float] = None
+    landholding_raw: Optional[str] = None
+    land_unit: Optional[str] = None
+    crops: List[str] = []
+    stated_needs: List[str] = []
+    irrigation_source: Optional[str] = None
+    social_category: Optional[str] = None
+
+class UnitAmbiguityNotice(BaseModel):
+    field: str
+    issue: str
+    clarification_prompt_hi: str
+    clarification_prompt_en: str
+
+class ConversationalIntakeResponse(BaseModel):
+    detected_language: str
+    intent: str
+    extracted_parameters: ExtractedProfileParameters
+    ambiguities: List[UnitAmbiguityNotice] = []
+    missing_information: List[str] = []
+    follow_up_questions_hi: List[str] = []
+    follow_up_questions_en: List[str] = []
+    can_proceed_to_evaluation: bool = False
+    structured_profile_candidate: Optional[FarmerProfileCreate] = None
+    summary_message: str
 

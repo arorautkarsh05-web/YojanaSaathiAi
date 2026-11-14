@@ -136,10 +136,14 @@ export function App() {
         )}
       </main>
 
-      {/* Grounded Scheme Q&A Modal */}
+      {/* Grounded Scheme Q&A & Natural Language Intake Modal */}
       <GroundedAssistantModal
         isOpen={isAssistantOpen}
         onClose={() => setIsAssistantOpen(false)}
+        onStartWithProfile={(profile, needs) => {
+          setIsAssistantOpen(false);
+          handleIntakeComplete(needs, profile);
+        }}
       />
 
       {/* Account Authentication Modal */}

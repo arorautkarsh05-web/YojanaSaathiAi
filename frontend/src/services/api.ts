@@ -67,6 +67,35 @@ export interface ConvergenceGraphEdge {
   source_title: string;
 }
 
+export interface UnitAmbiguityNotice {
+  field: string;
+  issue: string;
+  clarification_prompt_hi: string;
+  clarification_prompt_en: string;
+}
+
+export interface ConversationalIntakeResponse {
+  detected_language: string;
+  intent: string;
+  extracted_parameters: {
+    district?: string | null;
+    landholding_acres?: number | null;
+    landholding_raw?: string | null;
+    land_unit?: string | null;
+    crops: string[];
+    stated_needs: string[];
+    irrigation_source?: string | null;
+    social_category?: string | null;
+  };
+  ambiguities: UnitAmbiguityNotice[];
+  missing_information: string[];
+  follow_up_questions_hi: string[];
+  follow_up_questions_en: string[];
+  can_proceed_to_evaluation: boolean;
+  structured_profile_candidate?: FarmerProfileInput | null;
+  summary_message: string;
+}
+
 export interface ConvergenceGraphResponse {
   nodes: ConvergenceGraphNode[];
   edges: ConvergenceGraphEdge[];
@@ -242,6 +271,20 @@ export const api = {
     const data = await safeJson(res);
     if (!res.ok) {
       throw new Error(data.detail || 'Failed to query assistant');
+    }
+    return data;
+  },
+
+  async naturalLanguageIntake(text: string, preferredLanguage: string = 'hi'): Promise<ConversationalIntakeResponse> {
+    const res = await fetch(`${API_BASE}/assistant/intake`, {
+      method: 'POST',
+      headers: getHeaders(),
+      credentials: 'include',
+      body: JSON.stringify({ text, preferred_language: preferredLanguage }),
+    });
+    const data = await safeJson(res);
+    if (!res.ok) {
+      throw new Error(data.detail || 'Failed to process natural language intake');
     }
     return data;
   },

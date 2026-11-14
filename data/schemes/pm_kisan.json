@@ -1,0 +1,96 @@
+{
+  "scheme_code": "PM_KISAN",
+  "official_name_en": "Pradhan Mantri Kisan Samman Nidhi (PM-KISAN)",
+  "official_name_hi": "प्रधानमंत्री किसान सम्मान निधि (पीएम-किसान)",
+  "department": "Ministry of Agriculture & Farmers Welfare, GoI / UP Dept of Agriculture",
+  "level": "CENTRAL",
+  "benefit_type": "DIRECT_BENEFIT_TRANSFER",
+  "benefit_summary_en": "Direct financial benefit of Rs. 6,000 per year paid in three equal installments of Rs. 2,000 directly into the farmer's bank account via Aadhaar-linked DBT.",
+  "benefit_summary_hi": "प्रति वर्ष ₹6,000 की वित्तीय सहायता, ₹2,000 की तीन समान किस्तों में सीधे किसान के बैंक खाते में आधार-लिंक्ड डीबीटी द्वारा।",
+  "official_portal_url": "https://pmkisan.gov.in",
+  "source_title": "PM-KISAN Operational Guidelines 2020 & Gazette of India Extraordinary Notification",
+  "source_section": "Clause 2.1 (Eligible Beneficiaries) and Clause 3 (Exclusion Criteria)",
+  "source_url": "https://pmkisan.gov.in/Documents_New.aspx",
+  "verified_at": "2026-01-20T10:00:00Z",
+  "verified_by": "UP Agriculture & Revenue Policy Desk",
+  "rules": [
+    {
+      "rule_code": "RULE_PMK_LAND",
+      "title_en": "Cultivable Land Record Ownership",
+      "title_hi": "भू-अभिलेखों में कृषि भूमि का स्वामित्व (खतौनी)",
+      "field_name": "landholding_acres",
+      "operator": "GTE",
+      "target_value": 0.01,
+      "is_mandatory": true,
+      "citation": "PM-KISAN Guidelines Sec 2.1: Farmer families who hold cultivable land in land records."
+    },
+    {
+      "rule_code": "RULE_PMK_STATE",
+      "title_en": "Land Location in Uttar Pradesh",
+      "title_hi": "भूमि उत्तर प्रदेश के अधिसूचित जिले में स्थित हो",
+      "field_name": "state",
+      "operator": "EQUALS",
+      "target_value": "Uttar Pradesh",
+      "is_mandatory": true,
+      "citation": "PM-KISAN Guidelines Sec 2: All states and UTs."
+    },
+    {
+      "rule_code": "RULE_PMK_EXCLUSION_INSTITUTIONAL",
+      "title_en": "Non-Institutional Landholder (Exclusion Check)",
+      "title_hi": "गैर-संस्थागत भू-धारक (संस्थागत भूमि बाहर है)",
+      "field_name": "is_institutional",
+      "operator": "EQUALS",
+      "target_value": "false",
+      "is_mandatory": true,
+      "citation": "PM-KISAN Guidelines Sec 3.1: All institutional landholders are excluded."
+    }
+  ],
+  "need_tags": [
+    "income_support",
+    "direct_transfer",
+    "kisan_samman",
+    "cash_support",
+    "financial_aid"
+  ],
+  "category": "INCOME_SUPPORT",
+  "documents": [
+    {
+      "id": "doc_khatauni",
+      "title_en": "Land Record (Khatauni / UP Bhulekh Record)",
+      "title_hi": "जमीन की खतौनी / भूलेख नकल",
+      "source": "UP Revenue Dept"
+    },
+    {
+      "id": "doc_aadhaar",
+      "title_en": "Aadhaar Card (for identity verification at official portal)",
+      "title_hi": "आधार कार्ड (आधिकारिक पोर्टल सत्यापन हेतु)",
+      "source": "UIDAI"
+    },
+    {
+      "id": "doc_bank_passbook",
+      "title_en": "Bank Account Details / Passbook (DBT-enabled)",
+      "title_hi": "डीबीटी सक्रिय बैंक खाता पासबुक",
+      "source": "RBI Scheduled Bank / NPCI"
+    }
+  ],
+  "official_steps": [
+    {
+      "step_number": 1,
+      "title_en": "Self-Registration on PM-KISAN Official Portal",
+      "title_hi": "पीएम-किसान पोर्टल (pmkisan.gov.in) पर स्व-पंजीकरण",
+      "description_en": "Navigate to Farmers Corner -> New Farmer Registration. Enter Aadhaar number and state.",
+      "description_hi": "pmkisan.gov.in पर फार्मर्स कॉर्नर में जाकर 'नया किसान पंजीकरण' चुनें।",
+      "portal_or_destination": "https://pmkisan.gov.in",
+      "is_independent": true
+    },
+    {
+      "step_number": 2,
+      "title_en": "Tehsil / Lekhpal Land Verification in UP",
+      "title_hi": "तहसील / लेखपाल द्वारा खतौनी भू-सत्यापन",
+      "description_en": "The concerned Revenue Inspector or Lekhpal verifies the landholding in the state land database.",
+      "description_hi": "क्षेत्रीय लेखपाल द्वारा भूलेख रिकॉर्ड का ऑनलाइन मिलान व सत्यापन किया जाता है।",
+      "portal_or_destination": "UP Revenue Tehsil Office",
+      "is_independent": false
+    }
+  ]
+}

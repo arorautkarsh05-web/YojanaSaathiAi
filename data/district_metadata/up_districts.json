@@ -1,0 +1,269 @@
+{
+  "state": "Uttar Pradesh",
+  "total_districts": 75,
+  "districts": [
+    "Agra",
+    "Aligarh",
+    "Ambedkar Nagar",
+    "Amethi",
+    "Amroha",
+    "Auraiya",
+    "Ayodhya",
+    "Azamgarh",
+    "Baghpat",
+    "Bahraich",
+    "Ballia",
+    "Balrampur",
+    "Banda",
+    "Barabanki",
+    "Bareilly",
+    "Basti",
+    "Bhadohi",
+    "Bijnor",
+    "Budaun",
+    "Bulandshahr",
+    "Chandauli",
+    "Chitrakoot",
+    "Deoria",
+    "Etah",
+    "Etawah",
+    "Farrukhabad",
+    "Fatehpur",
+    "Firozabad",
+    "Gautam Buddha Nagar",
+    "Ghaziabad",
+    "Ghazipur",
+    "Gonda",
+    "Gorakhpur",
+    "Hamirpur",
+    "Hapur",
+    "Hardoi",
+    "Hathras",
+    "Jalaun",
+    "Jaunpur",
+    "Jhansi",
+    "Kannauj",
+    "Kanpur Dehat",
+    "Kanpur Nagar",
+    "Kasganj",
+    "Kaushambi",
+    "Kheri (Lakhimpur)",
+    "Kushinagar",
+    "Lalitpur",
+    "Lucknow",
+    "Maharajganj",
+    "Mahoba",
+    "Mainpuri",
+    "Mathura",
+    "Mau",
+    "Meerut",
+    "Mirzapur",
+    "Moradabad",
+    "Muzaffarnagar",
+    "Pilibhit",
+    "Pratapgarh",
+    "Prayagraj",
+    "Raebareli",
+    "Rampur",
+    "Saharanpur",
+    "Sambhal",
+    "Sant Kabir Nagar",
+    "Shahjahanpur",
+    "Shamli",
+    "Shravasti",
+    "Siddharthnagar",
+    "Sitapur",
+    "Sonbhadra",
+    "Sultanpur",
+    "Unnao",
+    "Varanasi"
+  ],
+  "agro_climatic_zones": {
+    "BUNDELKHAND": {
+      "name_en": "Bundelkhand Zone (Water-Deficit & Pulses Belt)",
+      "name_hi": "बुंदेलखंड क्षेत्र (दलहन व जल-संकट प्रभावित)",
+      "districts": [
+        "Banda",
+        "Chitrakoot",
+        "Hamirpur",
+        "Jalaun",
+        "Jhansi",
+        "Lalitpur",
+        "Mahoba"
+      ],
+      "special_policies": [
+        "BUNDELKHAND_PACKAGE",
+        "SPECIAL_PUMP_SUBSIDY",
+        "DROUGHT_RESILIENT_CROPS"
+      ],
+      "notified_pmfby_crops": [
+        "wheat",
+        "gram",
+        "lentil",
+        "mustard",
+        "sesamum",
+        "soybean",
+        "arhar",
+        "coarse_cereals"
+      ]
+    },
+    "WESTERN_PLAIN": {
+      "name_en": "Western Plain Zone (Intensive Sugarcane & Grain Belt)",
+      "name_hi": "पश्चिमी मैदानी क्षेत्र (गन्ना व गहन कृषि क्षेत्र)",
+      "districts": [
+        "Baghpat",
+        "Bijnor",
+        "Bulandshahr",
+        "Gautam Buddha Nagar",
+        "Ghaziabad",
+        "Hapur",
+        "Meerut",
+        "Moradabad",
+        "Muzaffarnagar",
+        "Rampur",
+        "Saharanpur",
+        "Sambhal",
+        "Shamli"
+      ],
+      "special_policies": [
+        "SUGARCANE_CLUSTER",
+        "TUBEWELL_SATURATION"
+      ],
+      "notified_pmfby_crops": [
+        "wheat",
+        "paddy",
+        "sugarcane",
+        "mustard",
+        "maize",
+        "potato"
+      ]
+    },
+    "EASTERN_PLAIN": {
+      "name_en": "Eastern Plain Zone (Rice-Wheat & High Density Belt)",
+      "name_hi": "पूर्वी मैदानी क्षेत्र (धान-गेहूँ सघन क्षेत्र)",
+      "districts": [
+        "Ambedkar Nagar",
+        "Amethi",
+        "Ayodhya",
+        "Azamgarh",
+        "Ballia",
+        "Basti",
+        "Bhadohi",
+        "Chandauli",
+        "Deoria",
+        "Ghazipur",
+        "Gorakhpur",
+        "Jaunpur",
+        "Kushinagar",
+        "Maharajganj",
+        "Mau",
+        "Mirzapur",
+        "Pratapgarh",
+        "Prayagraj",
+        "Sant Kabir Nagar",
+        "Siddharthnagar",
+        "Sonbhadra",
+        "Sultanpur",
+        "Varanasi"
+      ],
+      "special_policies": [
+        "FLOOD_PRONE_INDEMNITY",
+        "EASTERN_UP_DEVELOPMENT"
+      ],
+      "notified_pmfby_crops": [
+        "wheat",
+        "paddy",
+        "pulses",
+        "oilseeds",
+        "vegetables",
+        "mustard",
+        "gram"
+      ]
+    },
+    "CENTRAL_PLAIN": {
+      "name_en": "Central Plain Zone",
+      "name_hi": "मध्य मैदानी क्षेत्र",
+      "districts": [
+        "Auraiya",
+        "Barabanki",
+        "Etawah",
+        "Farrukhabad",
+        "Fatehpur",
+        "Hardoi",
+        "Kannauj",
+        "Kanpur Dehat",
+        "Kanpur Nagar",
+        "Kaushambi",
+        "Lucknow",
+        "Raebareli",
+        "Sitapur",
+        "Unnao"
+      ],
+      "special_policies": [
+        "HORTICULTURE_CORRIDOR",
+        "POTATO_CLUSTER"
+      ],
+      "notified_pmfby_crops": [
+        "wheat",
+        "paddy",
+        "potato",
+        "mustard",
+        "pulses",
+        "vegetables",
+        "maize"
+      ]
+    },
+    "TERAI": {
+      "name_en": "Tarai Zone (Sub-Himalayan Wet Belt)",
+      "name_hi": "तराई क्षेत्र (आर्द्र उप-हिमालयी बेल्ट)",
+      "districts": [
+        "Bahraich",
+        "Balrampur",
+        "Bareilly",
+        "Budaun",
+        "Kheri (Lakhimpur)",
+        "Pilibhit",
+        "Shahjahanpur",
+        "Shravasti"
+      ],
+      "special_policies": [
+        "HIGH_RAINFALL_DRAINAGE",
+        "TERAI_SUGARCANE"
+      ],
+      "notified_pmfby_crops": [
+        "wheat",
+        "paddy",
+        "sugarcane",
+        "lentil",
+        "mustard",
+        "maize"
+      ]
+    },
+    "SOUTH_WESTERN_SEMI_ARID": {
+      "name_en": "South-Western Semi-Arid Zone",
+      "name_hi": "दक्षिण-पश्चिमी अर्ध-शुष्क क्षेत्र",
+      "districts": [
+        "Agra",
+        "Aligarh",
+        "Etah",
+        "Firozabad",
+        "Hathras",
+        "Kasganj",
+        "Mainpuri",
+        "Mathura"
+      ],
+      "special_policies": [
+        "GROUNDWATER_DEPLETION_PRIORITY",
+        "MUSTARD_POTATO_CLUSTER"
+      ],
+      "notified_pmfby_crops": [
+        "wheat",
+        "mustard",
+        "potato",
+        "bajra",
+        "barley",
+        "paddy"
+      ]
+    }
+  }
+}
