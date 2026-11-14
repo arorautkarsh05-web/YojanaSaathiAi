@@ -1,8 +1,8 @@
 # YojanaSaathi AI — Automated Test Execution & Verification Results
 **Execution Timestamp:** November 14, 2026, 14:26:00 UTC+05:30  
 **Test Framework:** Pytest 9.2.0 | Python 3.13.7 | AnyIO 4.16.0 | Playwright 1.65.2 | Windows 11  
-**Build Status:** **102 PASSED | 0 FAILED | 0 SKIPPED (100% Pass Rate)**  
-**Execution Duration:** 2.80 seconds (Pytest) + Complete Playwright E2E Suite
+**Build Status:** **105 PASSED | 0 FAILED | 0 SKIPPED (100% Pass Rate)**  
+**Execution Duration:** 2.38 seconds (Pytest) + Complete Playwright E2E Suite
 
 ---
 
@@ -12,6 +12,7 @@
 |---|---|---|---|---|---|
 | `test_all_15_convergence_pairs.py` | 17 | 17 | 0 | 0 | **All 15 Pairwise Convergence Relations ($\binom{6}{2}=15$) + Anti-Transitivity** |
 | `test_scheme_policy_verification.py` | 28 | 28 | 0 | 0 | **All 6 Scheme Records, Rule Operators, Portals, Citations & Seeder Sync** |
+| `test_document_verification_workflow.py` | 3 | 3 | 0 | 0 | **1-Click Doc Verification, Magic-Byte Auto-Verify, Stage 6/7 Toggles & Final PDF** |
 | `test_natural_language_intake.py` | 4 | 4 | 0 | 0 | Hindi Conversational NLP, UP Bigha Ambiguity, Safe Offline Fallback |
 | `test_mandatory_scenarios.py` | 13 | 13 | 0 | 0 | Deterministic 3-Valued Rules, Missing Data Safety, Policy Impact |
 | `test_assistant_multilingual.py` | 8 | 8 | 0 | 0 | Multilingual Scheme Q&A (Hindi, English, Hinglish, Punjabi) |
@@ -22,7 +23,7 @@
 | `test_geo_and_readiness.py` | 8 | 8 | 0 | 0 | All 75 UP Districts, Document Readiness Scoring, Checklist Deduplication |
 | `test_postgresql_compatibility.py` | 2 | 2 | 0 | 0 | PostgreSQL DDL & Constraint Compilation |
 | `test_ranking_and_security.py` | 4 | 4 | 0 | 0 | Need Relevance Weighting, Token Family Rotation & Anti-Replay |
-| **TOTAL (PYTEST)** | **102** | **102** | **0** | **0** | **100% Comprehensive Pass Rate** |
+| **TOTAL (PYTEST)** | **105** | **105** | **0** | **0** | **100% Comprehensive Pass Rate** |
 
 ---
 

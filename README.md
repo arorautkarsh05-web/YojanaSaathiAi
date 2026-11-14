@@ -21,7 +21,7 @@ Unlike conventional scheme discovery platforms, YojanaSaathi focuses on **determ
 | **Adima Agarwal** | Team Leader |
 | **Utkarsh Arora** | Team Member |
 
-[![Tests](https://img.shields.io/badge/Pytest-102%20Passed%20(100%25)-brightgreen.svg)](docs/testing/TEST_RESULTS.md)
+[![Tests](https://img.shields.io/badge/Pytest-105%20Passed%20(100%25)-brightgreen.svg)](docs/testing/TEST_RESULTS.md)
 [![Playwright E2E](https://img.shields.io/badge/Playwright%20E2E-7%20Milestones%20Verified-blueviolet.svg)](docs/testing/PLAYWRIGHT_E2E_EVIDENCE.md)
 [![Convergence](https://img.shields.io/badge/Convergence-All%2015%20Pairs%20Verified-darkgreen.svg)](docs/policy/INDEPENDENT_CONVERGENCE_VERIFICATION_REPORT.md)
 [![Frontend](https://img.shields.io/badge/Vite%20React%2019-Production%20Build%20Clean-blue.svg)](frontend/)
