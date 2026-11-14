@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy import (
-    Column, String, Boolean, DateTime, Float, ForeignKey, Text, UniqueConstraint, Index
+    Column, String, Boolean, DateTime, Float, Integer, ForeignKey, Text, UniqueConstraint, Index
 )
 from sqlalchemy.orm import relationship
 from app.db.session import Base
@@ -187,4 +187,99 @@ class AuditLog(Base):
     resource_id = Column(String(100), nullable=True)
     metadata_json = Column(Text, nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class FarmerDocument(Base):
+    __tablename__ = "farmer_documents"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    plan_number = Column(String(50), nullable=False, index=True)
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True)
+    doc_id_key = Column(String(100), nullable=False, index=True)
+    document_category = Column(String(100), nullable=False)
+    title_en = Column(String(255), nullable=False)
+    title_hi = Column(String(255), nullable=False)
+    file_path = Column(String(500), nullable=False)
+    file_name_original = Column(String(255), nullable=False)
+    file_size_bytes = Column(Integer, nullable=False)
+    mime_type = Column(String(100), nullable=False)
+    upload_status = Column(String(50), default="UPLOADED", nullable=False) # UPLOADED, REPLACED, DELETED
+    verification_status = Column(String(50), default="UNDER_REVIEW", nullable=False) # NOT_UPLOADED, UPLOADED, UNDER_REVIEW, VERIFIED, REJECTED, REUPLOAD_REQUIRED, EXPIRED
+    rejection_reason = Column(Text, nullable=True)
+    verification_remarks = Column(Text, nullable=True)
+    verified_by_user_id = Column(String(36), nullable=True)
+    verified_at = Column(DateTime, nullable=True)
+    is_masked_aadhaar = Column(Boolean, default=False, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+    verifications = relationship("DocumentVerificationRecord", back_populates="document", cascade="all, delete-orphan")
+
+class DocumentVerificationRecord(Base):
+    __tablename__ = "document_verification_records"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    document_id = Column(String(36), ForeignKey("farmer_documents.id", ondelete="CASCADE"), nullable=False, index=True)
+    reviewer_id = Column(String(36), nullable=True)
+    action = Column(String(50), nullable=False) # APPROVE, REJECT, REQUEST_REUPLOAD
+    resulting_status = Column(String(50), nullable=False) # VERIFIED, REJECTED, REUPLOAD_REQUIRED
+    remarks = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    document = relationship("FarmerDocument", back_populates="verifications")
+
+class ActionItemCompletion(Base):
+    __tablename__ = "action_item_completions"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    plan_number = Column(String(50), nullable=False, index=True)
+    step_number = Column(Integer, nullable=False)
+    scheme_code = Column(String(50), nullable=False)
+    title_en = Column(String(255), nullable=False)
+    title_hi = Column(String(255), nullable=False)
+    is_completed = Column(Boolean, default=False, nullable=False)
+    completed_at = Column(DateTime, nullable=True)
+    acknowledgement_ref = Column(String(100), nullable=True)
+    evidence_notes = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+class FarmerApplicationProgress(Base):
+    __tablename__ = "farmer_application_progress"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    plan_number = Column(String(50), nullable=False, index=True)
+    scheme_code = Column(String(50), nullable=False, index=True)
+    status = Column(String(50), default="NOT_YET_APPLIED", nullable=False) # NOT_YET_APPLIED, APPLICATION_SUBMITTED, ACKNOWLEDGEMENT_RECEIVED, UNDER_REVIEW, ADDITIONAL_INFO_REQUESTED, APPLICATION_REJECTED, BENEFIT_RECEIVED
+    application_reference_number = Column(String(100), nullable=True)
+    farmer_remarks = Column(Text, nullable=True)
+    supporting_document_name = Column(String(255), nullable=True)
+    is_government_verified = Column(Boolean, default=False, nullable=False)
+    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
+
+class BenefitVerificationRecord(Base):
+    __tablename__ = "benefit_verification_records"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    plan_number = Column(String(50), nullable=False, index=True)
+    scheme_code = Column(String(50), nullable=False, index=True)
+    verification_source = Column(String(255), nullable=False) # e.g. "UP Agriculture DBT Portal Direct Verification", "Tehsil Sanction Order"
+    official_reference_number = Column(String(100), nullable=False)
+    status = Column(String(50), default="GOVERNMENT_VERIFIED", nullable=False) # GOVERNMENT_VERIFIED, BENEFIT_SANCTIONED, BENEFIT_DISBURSED
+    verified_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    reviewer_id = Column(String(36), nullable=True)
+    remarks = Column(Text, nullable=True)
+
+class ActionPlanConfirmation(Base):
+    __tablename__ = "action_plan_confirmations"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    plan_number = Column(String(50), unique=True, index=True, nullable=False)
+    summary_ref_id = Column(String(100), unique=True, index=True, nullable=False) # e.g. "FBS-UP-20261114-XXXXXX"
+    farmer_consent = Column(Boolean, default=True, nullable=False)
+    declaration_text = Column(Text, nullable=False)
+    farmer_name = Column(String(100), nullable=True)
+    farmer_mobile_masked = Column(String(20), nullable=True)
+    prerequisites_snapshot_json = Column(Text, nullable=False)
+    policy_version = Column(String(50), default="3.0", nullable=False)
+    confirmed_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
 

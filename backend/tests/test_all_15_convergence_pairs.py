@@ -59,3 +59,4 @@ def test_anti_transitivity_guarantee():
     assert pair_kisan_smam.status == "COMPATIBLE_CONFIRMED"
     # Transitivity must NOT be inferred!
     assert pair_pmfby_smam.status == "UNKNOWN_REQUIRES_VERIFICATION"
+

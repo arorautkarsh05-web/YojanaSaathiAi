@@ -43,3 +43,8 @@ Thumbs.db
 .agents/
 skills-lock.json
 
+# Storage & Uploads
+backend/storage/documents/*
+!backend/storage/documents/.gitkeep
+
+

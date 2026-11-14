@@ -142,6 +142,107 @@ export interface ActionPlanData {
   disclaimer: string;
 }
 
+export interface RequiredDocumentSpec {
+  doc_id_key: string;
+  title_en: string;
+  title_hi: string;
+  document_category: string;
+  is_mandatory: boolean;
+  is_aadhaar: boolean;
+  applicable_schemes: string[];
+  source_authority: string;
+  notes_hi?: string | null;
+}
+
+export interface FarmerDocumentOut {
+  id: string;
+  plan_number: string;
+  doc_id_key: string;
+  document_category: string;
+  title_en: string;
+  title_hi: string;
+  file_name_original: string;
+  file_size_bytes: number;
+  mime_type: string;
+  upload_status: 'UPLOADED' | 'REPLACED' | 'DELETED';
+  verification_status: 'NOT_UPLOADED' | 'UPLOADED' | 'UNDER_REVIEW' | 'VERIFIED' | 'REJECTED' | 'REUPLOAD_REQUIRED' | 'EXPIRED';
+  rejection_reason?: string | null;
+  verification_remarks?: string | null;
+  verified_at?: string | null;
+  is_masked_aadhaar: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ActionItemCompletionOut {
+  id: string;
+  plan_number: string;
+  step_number: number;
+  scheme_code: string;
+  title_en: string;
+  title_hi: string;
+  is_completed: boolean;
+  completed_at?: string | null;
+  acknowledgement_ref?: string | null;
+  evidence_notes?: string | null;
+}
+
+export interface FarmerApplicationProgressOut {
+  id: string;
+  plan_number: string;
+  scheme_code: string;
+  status: 'NOT_YET_APPLIED' | 'APPLICATION_SUBMITTED' | 'ACKNOWLEDGEMENT_RECEIVED' | 'UNDER_REVIEW' | 'ADDITIONAL_INFO_REQUESTED' | 'APPLICATION_REJECTED' | 'BENEFIT_RECEIVED';
+  application_reference_number?: string | null;
+  farmer_remarks?: string | null;
+  supporting_document_name?: string | null;
+  is_government_verified: boolean;
+  updated_at: string;
+}
+
+export interface BenefitVerificationRecordOut {
+  id: string;
+  plan_number: string;
+  scheme_code: string;
+  verification_source: string;
+  official_reference_number: string;
+  status: string;
+  verified_at: string;
+  remarks?: string | null;
+}
+
+export interface ActionPlanConfirmationResponse {
+  summary_ref_id: string;
+  plan_number: string;
+  farmer_consent: boolean;
+  declaration_text: string;
+  farmer_name?: string | null;
+  farmer_mobile_masked?: string | null;
+  policy_version: string;
+  confirmed_at: string;
+  is_confirmed: boolean;
+}
+
+export interface WorkflowStageStatus {
+  stage_number: number;
+  title_en: string;
+  title_hi: string;
+  status: 'COMPLETED' | 'ACTIVE' | 'PENDING';
+  detail: string;
+}
+
+export interface ActionPlanWorkflowSummaryResponse {
+  plan_number: string;
+  stages: WorkflowStageStatus[];
+  required_documents: RequiredDocumentSpec[];
+  uploaded_documents: FarmerDocumentOut[];
+  action_steps: ActionItemCompletionOut[];
+  application_progress: FarmerApplicationProgressOut[];
+  government_verifications: BenefitVerificationRecordOut[];
+  confirmation?: ActionPlanConfirmationResponse | null;
+  can_confirm: boolean;
+  unmet_prerequisites: string[];
+}
+
 // Token helper for authorization headers
 let accessToken: string | null = null;
 
@@ -366,5 +467,180 @@ export const api = {
       throw new Error(data.detail || 'Failed to fetch admin overview');
     }
     return data;
+  },
+
+  // --- Document Verification & Action Plan Workflow ---
+  async getWorkflowSummary(planNumber: string): Promise<ActionPlanWorkflowSummaryResponse> {
+    const res = await fetch(`${API_BASE}/action-plans/${planNumber}/workflow`, {
+      headers: getHeaders(),
+      credentials: 'include',
+    });
+    const data = await safeJson(res);
+    if (!res.ok) {
+      throw new Error(data.detail || 'कार्य योजना का विवरण प्राप्त नहीं हो सका (Failed to fetch workflow summary).');
+    }
+    return data;
+  },
+
+  async uploadDocument(
+    planNumber: string,
+    docIdKey: string,
+    file: File
+  ): Promise<{ message: string; document: FarmerDocumentOut }> {
+    const formData = new FormData();
+    formData.append('doc_id_key', docIdKey);
+    formData.append('file', file);
+
+    const headers: Record<string, string> = {};
+    if (accessToken) {
+      headers['Authorization'] = `Bearer ${accessToken}`;
+    }
+
+    const res = await fetch(`${API_BASE}/action-plans/${planNumber}/documents/upload`, {
+      method: 'POST',
+      headers,
+      credentials: 'include',
+      body: formData,
+    });
+    const data = await safeJson(res);
+    if (!res.ok) {
+      throw new Error(data.detail || 'दस्तावेज़ अपलोड विफल रहा (Document upload failed).');
+    }
+    return data;
+  },
+
+  async verifyDocument(
+    planNumber: string,
+    docId: string,
+    action: 'APPROVE' | 'REJECT' | 'REQUEST_REUPLOAD',
+    rejectionReason?: string,
+    remarks?: string
+  ): Promise<FarmerDocumentOut> {
+    const res = await fetch(`${API_BASE}/action-plans/${planNumber}/documents/${docId}/verify`, {
+      method: 'POST',
+      headers: getHeaders(),
+      credentials: 'include',
+      body: JSON.stringify({
+        action,
+        rejection_reason: rejectionReason,
+        remarks,
+      }),
+    });
+    const data = await safeJson(res);
+    if (!res.ok) {
+      throw new Error(data.detail || 'सत्यापन प्रक्रिया विफल रही (Verification action failed).');
+    }
+    return data;
+  },
+
+  async toggleActionStep(
+    planNumber: string,
+    stepNumber: number,
+    schemeCode: string,
+    isCompleted: boolean,
+    acknowledgementRef?: string,
+    evidenceNotes?: string
+  ): Promise<ActionItemCompletionOut> {
+    const res = await fetch(`${API_BASE}/action-plans/${planNumber}/steps/${stepNumber}/toggle`, {
+      method: 'POST',
+      headers: getHeaders(),
+      credentials: 'include',
+      body: JSON.stringify({
+        step_number: stepNumber,
+        scheme_code: schemeCode,
+        is_completed: isCompleted,
+        acknowledgement_ref: acknowledgementRef,
+        evidence_notes: evidenceNotes,
+      }),
+    });
+    const data = await safeJson(res);
+    if (!res.ok) {
+      throw new Error(data.detail || 'चरण अद्यतन विफल रहा (Failed to update step).');
+    }
+    return data;
+  },
+
+  async updateSchemeProgress(
+    planNumber: string,
+    schemeCode: string,
+    status: string,
+    appRef?: string,
+    remarks?: string
+  ): Promise<FarmerApplicationProgressOut> {
+    const res = await fetch(`${API_BASE}/action-plans/${planNumber}/schemes/${schemeCode}/progress`, {
+      method: 'POST',
+      headers: getHeaders(),
+      credentials: 'include',
+      body: JSON.stringify({
+        scheme_code: schemeCode,
+        status,
+        application_reference_number: appRef,
+        farmer_remarks: remarks,
+      }),
+    });
+    const data = await safeJson(res);
+    if (!res.ok) {
+      throw new Error(data.detail || 'प्रगति अद्यतन विफल रहा (Failed to update scheme progress).');
+    }
+    return data;
+  },
+
+  async recordGovtVerification(
+    planNumber: string,
+    schemeCode: string,
+    verificationSource: string,
+    officialReferenceNumber: string,
+    status: string = 'GOVERNMENT_VERIFIED',
+    remarks?: string
+  ): Promise<BenefitVerificationRecordOut> {
+    const res = await fetch(`${API_BASE}/action-plans/${planNumber}/schemes/${schemeCode}/govt-verification`, {
+      method: 'POST',
+      headers: getHeaders(),
+      credentials: 'include',
+      body: JSON.stringify({
+        scheme_code: schemeCode,
+        verification_source: verificationSource,
+        official_reference_number: officialReferenceNumber,
+        status,
+        remarks,
+      }),
+    });
+    const data = await safeJson(res);
+    if (!res.ok) {
+      throw new Error(data.detail || 'सरकारी सत्यापन रिकॉर्ड विफल रहा (Failed to record government verification).');
+    }
+    return data;
+  },
+
+  async confirmActionPlan(
+    planNumber: string,
+    farmerConsent: boolean = true,
+    farmerName?: string,
+    farmerMobile?: string
+  ): Promise<ActionPlanConfirmationResponse> {
+    const res = await fetch(`${API_BASE}/action-plans/${planNumber}/confirm`, {
+      method: 'POST',
+      headers: getHeaders(),
+      credentials: 'include',
+      body: JSON.stringify({
+        farmer_consent: farmerConsent,
+        farmer_name: farmerName,
+        farmer_mobile: farmerMobile,
+      }),
+    });
+    const data = await safeJson(res);
+    if (!res.ok) {
+      const msg = typeof data.detail === 'object' && data.detail?.message ? data.detail.message : (data.detail || 'कार्य योजना संपुष्टि विफल रही (Failed to confirm action plan).');
+      throw new Error(msg);
+    }
+    return data;
+  },
+
+  getSummaryPdfUrl(planNumber: string): string {
+    return `${API_BASE}/action-plans/${planNumber}/summary-pdf`;
+  },
+
+  getDocumentDownloadUrl(planNumber: string, docId: string): string {
+    return `${API_BASE}/action-plans/${planNumber}/documents/${docId}/download`;
   }
 };

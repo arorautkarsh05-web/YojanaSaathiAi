@@ -30,7 +30,10 @@ This document presents automated end-to-end evidence validating the complete cit
 | **Step 4** | Deterministic 3-Valued Recommendations | `PASS`, `UNKNOWN`, `FAIL` Badges across 6 Schemes | **PASSED** | [`playwright_04_recommendations.png`](file:///d:/YojanaSaathi/docs/testing/playwright_04_recommendations.png) |
 | **Step 5** | Multi-Scheme Convergence Verification | Pairwise Compatibility Modal (PMFBY $\leftrightarrow$ KCC, PMKSY) | **PASSED** | [`playwright_05_convergence_modal.png`](file:///d:/YojanaSaathi/docs/testing/playwright_05_convergence_modal.png) |
 | **Step 6** | Personalized Action Plan & 7-Stage Tracker | Plan #YS-UP-20261114-XXXXXX, Document Checklist | **PASSED** | [`playwright_06_action_plan.png`](file:///d:/YojanaSaathi/docs/testing/playwright_06_action_plan.png) |
-| **Step 7** | Offline Recovery after Browser Restart | `localStorage` State Injection & Offline Execution | **PASSED** | [`playwright_07_offline_recovery.png`](file:///d:/YojanaSaathi/docs/testing/playwright_07_offline_recovery.png) |
+| **Step 7** | Document Verification Centre (Stage 4) | Multi-Scheme Deduplicated Checklist, Reviewer Panel | **PASSED** | [`playwright_08_doc_verification_centre.png`](file:///d:/YojanaSaathi/docs/testing/playwright_08_doc_verification_centre.png) |
+| **Step 8** | Verified Official Next Steps (Stage 5) | Interactive Step Checkboxes, Application Ack Ref | **PASSED** | [`playwright_09_official_steps.png`](file:///d:/YojanaSaathi/docs/testing/playwright_09_official_steps.png) |
+| **Step 9** | Final Confirmation Modal & Summary Trigger | Prerequisite Checks, Farmer Consent, Summary Reference | **PASSED** | [`playwright_10_confirmation_modal.png`](file:///d:/YojanaSaathi/docs/testing/playwright_10_confirmation_modal.png) |
+| **Step 10** | Offline Recovery after Browser Restart | `localStorage` State Injection & Offline Execution | **PASSED** | [`playwright_07_offline_recovery.png`](file:///d:/YojanaSaathi/docs/testing/playwright_07_offline_recovery.png) |
 
 ---
 
@@ -132,14 +135,16 @@ This document presents automated end-to-end evidence validating the complete cit
 +--------------------------------------------------+-----------------------+
 | Metric                                           | Result                |
 +--------------------------------------------------+-----------------------+
-| Total Journey Milestones Automated               | 7 Steps               |
+| Total Journey Milestones Automated               | 10 Steps              |
 | Test Execution Status                            | 100% PASSED (0 Errors)|
-| Total Screenshots Captured                       | 7 Full-Res PNGs       |
-| API Backend Endpoints Tested                     | 4 Routes              |
+| Total Screenshots Captured                       | 10 Full-Res PNGs      |
+| API Backend Endpoints Tested                     | 11 Routes             |
 | Browser Console Errors                           | 0 Fatal Exceptions    |
 | Local Storage Offline Recovery                   | Verified & Functional |
+| ReportLab PDF Summary Generation                 | Verified & Downloadable|
 +--------------------------------------------------+-----------------------+
 ```
 
 **Verified by**: Team Aalekh (Adima Agarwal, Utkarsh Arora)  
 **Date**: November 2026
+

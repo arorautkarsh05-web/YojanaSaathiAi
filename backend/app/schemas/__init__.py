@@ -239,3 +239,132 @@ class ConversationalIntakeResponse(BaseModel):
     structured_profile_candidate: Optional[FarmerProfileCreate] = None
     summary_message: str
 
+# --- Document Verification and Workflow Schemas ---
+class RequiredDocumentSpec(BaseModel):
+    doc_id_key: str
+    title_en: str
+    title_hi: str
+    document_category: str
+    is_mandatory: bool
+    is_aadhaar: bool = False
+    applicable_schemes: List[str]
+    source_authority: str
+    notes_hi: Optional[str] = None
+
+class FarmerDocumentOut(BaseModel):
+    id: str
+    plan_number: str
+    doc_id_key: str
+    document_category: str
+    title_en: str
+    title_hi: str
+    file_name_original: str
+    file_size_bytes: int
+    mime_type: str
+    upload_status: str # UPLOADED, REPLACED, DELETED
+    verification_status: str # NOT_UPLOADED, UPLOADED, UNDER_REVIEW, VERIFIED, REJECTED, REUPLOAD_REQUIRED, EXPIRED
+    rejection_reason: Optional[str] = None
+    verification_remarks: Optional[str] = None
+    verified_at: Optional[datetime] = None
+    is_masked_aadhaar: bool
+    created_at: datetime
+    updated_at: datetime
+
+class DocumentUploadResponse(BaseModel):
+    message: str
+    document: FarmerDocumentOut
+
+class DocumentVerifyRequest(BaseModel):
+    action: str # APPROVE, REJECT, REQUEST_REUPLOAD
+    rejection_reason: Optional[str] = None
+    remarks: Optional[str] = None
+
+class ActionItemCompletionOut(BaseModel):
+    id: str
+    plan_number: str
+    step_number: int
+    scheme_code: str
+    title_en: str
+    title_hi: str
+    is_completed: bool
+    completed_at: Optional[datetime] = None
+    acknowledgement_ref: Optional[str] = None
+    evidence_notes: Optional[str] = None
+
+class ActionStepToggleRequest(BaseModel):
+    step_number: int
+    scheme_code: str
+    is_completed: bool
+    acknowledgement_ref: Optional[str] = None
+    evidence_notes: Optional[str] = None
+
+class FarmerApplicationProgressOut(BaseModel):
+    id: str
+    plan_number: str
+    scheme_code: str
+    status: str
+    application_reference_number: Optional[str] = None
+    farmer_remarks: Optional[str] = None
+    supporting_document_name: Optional[str] = None
+    is_government_verified: bool
+    updated_at: datetime
+
+class FarmerApplicationProgressUpdate(BaseModel):
+    scheme_code: str
+    status: str
+    application_reference_number: Optional[str] = None
+    farmer_remarks: Optional[str] = None
+
+class BenefitVerificationRecordOut(BaseModel):
+    id: str
+    plan_number: str
+    scheme_code: str
+    verification_source: str
+    official_reference_number: str
+    status: str
+    verified_at: datetime
+    remarks: Optional[str] = None
+
+class BenefitVerificationCreate(BaseModel):
+    scheme_code: str
+    verification_source: str
+    official_reference_number: str
+    status: str = "GOVERNMENT_VERIFIED"
+    remarks: Optional[str] = None
+
+class ActionPlanConfirmationRequest(BaseModel):
+    farmer_consent: bool = True
+    farmer_name: Optional[str] = None
+    farmer_mobile: Optional[str] = None
+
+class ActionPlanConfirmationResponse(BaseModel):
+    summary_ref_id: str
+    plan_number: str
+    farmer_consent: bool
+    declaration_text: str
+    farmer_name: Optional[str] = None
+    farmer_mobile_masked: Optional[str] = None
+    policy_version: str
+    confirmed_at: datetime
+    is_confirmed: bool
+
+class WorkflowStageStatus(BaseModel):
+    stage_number: int
+    title_en: str
+    title_hi: str
+    status: str # COMPLETED, ACTIVE, PENDING
+    detail: str
+
+class ActionPlanWorkflowSummaryResponse(BaseModel):
+    plan_number: str
+    stages: List[WorkflowStageStatus]
+    required_documents: List[RequiredDocumentSpec]
+    uploaded_documents: List[FarmerDocumentOut]
+    action_steps: List[ActionItemCompletionOut]
+    application_progress: List[FarmerApplicationProgressOut]
+    government_verifications: List[BenefitVerificationRecordOut]
+    confirmation: Optional[ActionPlanConfirmationResponse] = None
+    can_confirm: bool
+    unmet_prerequisites: List[str]
+
+

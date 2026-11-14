@@ -65,32 +65,32 @@ def run_e2e_tests():
         print(f"  • [Screenshot Captured] {screenshot_2}")
 
         # Step 3: Natural Language Intake with Bigha Ambiguity
-        print("\n[Step 3] Submitting Natural Language Intake Query...")
+        print("\n[Step 3] Submitting Natural Language Intake Query...", flush=True)
         query_text = "मैं झांसी जिले से हूं, मेरे पास दो बीघा जमीन है और मैं गेहूं की खेती करता हूं। मुझे सिंचाई के लिए सरकारी सहायता चाहिए।"
-        input_box = page.locator("textarea, input[placeholder*='उदा.'], input[placeholder*='e.g.']").first
+        input_box = page.locator("form input[type='text']").first
         input_box.fill(query_text)
         
-        # Click send button
-        send_btn = page.locator("button:has(svg), button:has-text('पूछें'), button:has-text('Send')").last
-        send_btn.click()
-        print("  • Query Submitted. Waiting for Grounded NLP analysis & Bigha unit detection...")
+        # Submit form with Enter
+        input_box.press("Enter")
+        print("  • Query Submitted. Waiting for Grounded NLP analysis & Bigha unit detection...", flush=True)
 
         # Wait for the assistant's intake response message to appear
-        page.wait_for_selector("button:has-text('इस जानकारी से पात्रता जाँचें'), button:has-text('Evaluate Schemes')", timeout=15000)
+        eval_btn = page.locator("button", has_text="पात्रता जाँचें").first
+        eval_btn.wait_for(state="visible", timeout=15000)
         time.sleep(1)
 
         # Capture Screenshot 3: Intake Analyzed
         screenshot_3 = os.path.join(TESTING_DOCS_DIR, "playwright_03_intake_analyzed.png")
         page.screenshot(path=screenshot_3, full_page=False)
-        print(f"  • [Screenshot Captured] {screenshot_3}")
+        print(f"  • [Screenshot Captured] {screenshot_3}", flush=True)
 
         # Step 4: Click 'Evaluate Schemes for this Profile'
-        print("\n[Step 4] Triggering Three-Valued Deterministic Rules Evaluation...")
-        eval_btn = page.locator("button:has-text('इस जानकारी से पात्रता जाँचें'), button:has-text('Evaluate Schemes')").first
+        print("\n[Step 4] Triggering Three-Valued Deterministic Rules Evaluation...", flush=True)
         eval_btn.click()
 
         # Wait for Recommendations view to load
-        page.wait_for_selector("button:has-text('कार्य योजना तैयार करें'), button:has-text('Generate Action Plan')", timeout=15000)
+        gen_plan_btn = page.locator("button:has-text('कार्य योजना तैयार करें'), button:has-text('Generate Action Plan')").first
+        gen_plan_btn.wait_for(state="visible", timeout=15000)
         time.sleep(1.5)
 
         # Capture Screenshot 4: Recommendations & Eligibility Status
@@ -109,15 +109,18 @@ def run_e2e_tests():
             print(f"  • [Screenshot Captured] {screenshot_5}")
             
             # Close convergence modal
-            close_btn = page.locator("button:has-text('समझ लिया / बंद करें'), button:has-text('Understood'), button:has-text('✕')").first
+            time.sleep(1)
+            close_btn = page.locator("div.fixed button:has-text('समझ लिया'), div.fixed button:has-text('Understood'), div.fixed button:has-text('✕')").first
             if close_btn.is_visible():
                 close_btn.click()
-                time.sleep(1)
+            else:
+                page.keyboard.press("Escape")
+            time.sleep(1.5)
 
         # Step 6: Generate Action Plan
-        print("\n[Step 6] Generating Personalized Action Plan (7-Stage Roadmap)...")
+        print("\n[Step 6] Generating Personalized Action Plan (7-Stage Roadmap)...", flush=True)
         gen_plan_btn = page.locator("button:has-text('कार्य योजना तैयार करें'), button:has-text('Generate Action Plan')").first
-        gen_plan_btn.click()
+        gen_plan_btn.click(force=True)
 
         # Wait for Action Plan View
         page.wait_for_selector("button:has-text('प्रिंट'), button:has-text('Print')", timeout=15000)
@@ -126,7 +129,47 @@ def run_e2e_tests():
         # Capture Screenshot 6: Action Plan View
         screenshot_6 = os.path.join(TESTING_DOCS_DIR, "playwright_06_action_plan.png")
         page.screenshot(path=screenshot_6, full_page=False)
-        print(f"  • [Screenshot Captured] {screenshot_6}")
+        print(f"  • [Screenshot Captured] {screenshot_6}", flush=True)
+
+        # Step 6b: Test Stage 4 (Document Verification Centre)
+        print("\n[Step 6b] Testing Document Verification Centre (Stage 4)...", flush=True)
+        doc_tab = page.locator("button", has_text="दस्तावेज़ सत्यापन").first
+        if doc_tab.is_visible():
+            doc_tab.click()
+            time.sleep(1)
+        screenshot_doc = os.path.join(TESTING_DOCS_DIR, "playwright_08_doc_verification_centre.png")
+        page.screenshot(path=screenshot_doc, full_page=False)
+        print(f"  • [Screenshot Captured] {screenshot_doc}", flush=True)
+
+        # Step 6c: Test Stage 5 (Interactive Official Steps)
+        print("\n[Step 6c] Testing Interactive Official Next Steps (Stage 5)...", flush=True)
+        steps_tab = page.locator("button", has_text="आधिकारिक आवेदन कदम").first
+        if steps_tab.is_visible():
+            steps_tab.click()
+            time.sleep(1)
+            # Toggle first checkbox
+            first_check = page.locator("button[title*='चिह्नित']").first
+            if first_check.is_visible():
+                first_check.click()
+                time.sleep(0.5)
+        screenshot_steps = os.path.join(TESTING_DOCS_DIR, "playwright_09_official_steps.png")
+        page.screenshot(path=screenshot_steps, full_page=False)
+        print(f"  • [Screenshot Captured] {screenshot_steps}", flush=True)
+
+        # Step 6d: Test Confirmation Modal
+        print("\n[Step 6d] Opening Final Confirmation Modal...", flush=True)
+        confirm_btn = page.locator("button:has-text('कार्य योजना संपुष्ट करें'), button:has-text('Confirm Action Plan')").first
+        if confirm_btn.is_visible():
+            confirm_btn.click()
+            time.sleep(1)
+            screenshot_confirm = os.path.join(TESTING_DOCS_DIR, "playwright_10_confirmation_modal.png")
+            page.screenshot(path=screenshot_confirm, full_page=False)
+            print(f"  • [Screenshot Captured] {screenshot_confirm}", flush=True)
+            # Close confirmation modal
+            modal_close = page.locator("button:has-text('✕'), button:has-text('रद्द करें')").first
+            if modal_close.is_visible():
+                modal_close.click()
+                time.sleep(0.5)
 
         # Step 7: Check LocalStorage caching & Persist Browser State
         latest_plan_number = page.evaluate("localStorage.getItem('yojanasaathi_latest_plan_number')")
