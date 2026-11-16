@@ -16,6 +16,7 @@ YojanaSaathi AI is an intelligent farmer-benefit navigation platform designed to
 |---|---|---|
 | **Adima Agarwal** | Team Leader | Team Aalekh |
 | **Utkarsh Arora** | Team Member | Team Aalekh |
+ live Link : https://yojanasaathi-frontend.onrender.com/
 
 ---
 
