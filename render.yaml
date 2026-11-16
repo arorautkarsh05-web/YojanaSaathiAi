@@ -61,10 +61,7 @@ services:
         destination: /index.html
     envVars:
       - key: VITE_API_URL
-        fromService:
-          type: web
-          name: yojanasaathi-backend
-          property: host
+        value: https://yojanasaathi-backend-6aql.onrender.com
 
 databases:
   # ----------------------------------------------------------------------------
