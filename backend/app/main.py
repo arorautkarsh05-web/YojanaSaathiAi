@@ -85,10 +85,25 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_origin_regex=r"^https?://.*\.onrender\.com$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Root endpoint for platform health and metadata
+@app.get("/", tags=["Observability"])
+def root_endpoint():
+    """Root health and discovery endpoint."""
+    return {
+        "service": settings.PROJECT_NAME,
+        "version": settings.VERSION,
+        "environment": settings.ENV,
+        "status": "online",
+        "docs_url": "/docs",
+        "health_url": "/health",
+        "api_v1_str": settings.API_V1_STR
+    }
 
 # Security headers middleware
 @app.middleware("http")
@@ -171,3 +186,29 @@ app.include_router(convergence.router, prefix=settings.API_V1_STR)
 app.include_router(action_plans.router, prefix=settings.API_V1_STR)
 app.include_router(assistant.router, prefix=settings.API_V1_STR)
 app.include_router(admin.router, prefix=settings.API_V1_STR)
+
+# Serve built frontend SPA if available (unified full-stack deployment fallback)
+import os
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+frontend_dist = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "dist"))
+if os.path.exists(frontend_dist) and os.path.exists(os.path.join(frontend_dist, "index.html")):
+    assets_dir = os.path.join(frontend_dist, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_spa(full_path: str):
+        # Exclude API, docs and health paths
+        if full_path.startswith("api/") or full_path in ("docs", "redoc", "openapi.json", "health", "ready", "live"):
+            return JSONResponse(status_code=404, content={"detail": "Not Found"})
+        target_file = os.path.join(frontend_dist, full_path)
+        if os.path.isfile(target_file):
+            return FileResponse(target_file)
+        return FileResponse(os.path.join(frontend_dist, "index.html"))
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=False)

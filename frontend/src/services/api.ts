@@ -1,4 +1,8 @@
-const API_BASE = '/api/v1';
+let baseHost = (import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || '').trim();
+if (baseHost && !baseHost.startsWith('http://') && !baseHost.startsWith('https://')) {
+  baseHost = `https://${baseHost}`;
+}
+const API_BASE = baseHost ? `${baseHost.replace(/\/+$/, '')}/api/v1` : '/api/v1';
 
 export interface FarmerProfileInput {
   district: string;
