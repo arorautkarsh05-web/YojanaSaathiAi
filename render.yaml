@@ -47,10 +47,8 @@ services:
   # ----------------------------------------------------------------------------
   # Frontend Static Site (React 19 + Vite)
   # ----------------------------------------------------------------------------
-  - type: web
+  - type: static
     name: yojanasaathi-frontend
-    runtime: static
-    region: oregon
     plan: free
     branch: main
     rootDir: frontend
