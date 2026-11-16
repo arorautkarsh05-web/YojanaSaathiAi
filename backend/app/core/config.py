@@ -1,8 +1,9 @@
 import os
+import json
 import secrets
 from typing import List, Union
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import model_validator
+from pydantic import model_validator, field_validator
 
 def get_cors_origins() -> List[str]:
     raw = os.getenv("BACKEND_CORS_ORIGINS", "")
@@ -52,7 +53,26 @@ class Settings(BaseSettings):
     COOKIE_SAMESITE: str = os.getenv("COOKIE_SAMESITE", "lax")
     
     # CORS
-    BACKEND_CORS_ORIGINS: List[str] = get_cors_origins()
+    BACKEND_CORS_ORIGINS: Union[str, List[str]] = get_cors_origins()
+
+    @field_validator("BACKEND_CORS_ORIGINS", mode="after")
+    @classmethod
+    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
+        if isinstance(v, str):
+            v_str = v.strip()
+            if not v_str or v_str == "*":
+                return ["*"]
+            if v_str.startswith("[") and v_str.endswith("]"):
+                try:
+                    parsed = json.loads(v_str)
+                    if isinstance(parsed, list):
+                        return parsed
+                except Exception:
+                    pass
+            return [origin.strip() for origin in v_str.split(",") if origin.strip()]
+        if isinstance(v, list):
+            return v
+        return ["*"]
     
     # Admin Bootstrap (Zero hardcoding - driven by environment)
     ADMIN_INITIAL_EMAIL: str = os.getenv("ADMIN_INITIAL_EMAIL", "admin@yojanasaathi.up.gov.in")

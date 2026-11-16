@@ -15,15 +15,14 @@ from app.api.routes import auth, profiles, schemes, recommendations, convergence
 
 logger = logging.getLogger("uvicorn.error")
 
-# Create tables
-Base.metadata.create_all(bind=engine)
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Verify and display database connection sign
     db = SessionLocal()
     try:
         db.execute(text("SELECT 1"))
+        # Create database tables idempotently
+        Base.metadata.create_all(bind=engine)
         db_url_display = str(settings.DATABASE_URL).split("@")[-1]
         banner = (
             "\n" + "="*68 + "\n"
